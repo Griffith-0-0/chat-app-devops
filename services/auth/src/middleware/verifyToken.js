@@ -1,0 +1,21 @@
+const jwt = require('jsonwebtoken');
+const redis = require('../redis');
+require('dotenv').config();
+
+const verifyToken = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+
+  const isBlacklisted = await redis.get(`blacklist:${token}`);
+  if (isBlacklisted) return res.status(401).json({ error: 'Token revoked' });
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = payload.userId;
+    next();
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+module.exports = verifyToken;

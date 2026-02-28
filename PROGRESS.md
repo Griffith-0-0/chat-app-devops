@@ -9,7 +9,7 @@
 
 | Phase | Description | Statut |
 |-------|-------------|--------|
-| Phase 1 | Setup monorepo | 🔴 |
+| Phase 1 | Setup monorepo | ✅ |
 | Phase 2 | Développement services | 🔴 |
 | Phase 3 | Containerisation Docker | 🔴 |
 | Phase 4 | Tests Jest + Supertest | 🔴 |
@@ -26,6 +26,18 @@
 
 ## ✅ Terminé
 <!-- Ajouter ici ce qui est fait -->
+Phase 1 terminée ✅
+Voici ce que tu as accompli :
+Étape	                                        Statut
+Repo GitHub créé et cloné	                    ✅
+Structure des dossiers	                        ✅
+.gitignore configuré	                        ✅
+npm init sur les 3 services	                    ✅
+Front React + Vite initialisé	                ✅
+ESLint sur les 3 services	                    ✅
+docker-compose.yml (postgres, redis, rabbitmq)	✅
+Premier commit pushé sur GitHub	                ✅
+
 
 ## 🔄 En cours
 <!-- Ajouter ici la phase en cours et ce qui reste -->
