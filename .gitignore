@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.npm
+
+# Environment variables — JAMAIS commiter les secrets
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Kubernetes secrets locaux
+kubeconfig
+*.kubeconfig
