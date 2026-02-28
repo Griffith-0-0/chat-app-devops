@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "lint": "eslint src/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +16,16 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.0.2",
-    "globals": "^17.3.0"
+    "globals": "^17.3.0",
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.9",
+    "axios": "^1.13.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "pg": "^8.19.0",
+    "redis": "^5.11.0",
+    "socket.io": "^4.8.3"
   }
 }
