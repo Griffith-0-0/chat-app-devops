@@ -7,7 +7,9 @@ const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
+const cors = require('cors');
 app.use(express.json());
+app.use(cors());
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
