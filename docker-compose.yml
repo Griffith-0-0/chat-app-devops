@@ -5,24 +5,97 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: chat_db
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chat-network
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    networks:
+      - chat-network
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    ports:
-      - "5672:5672"
-      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - chat-network
+
+  auth:
+    build: ./services/auth
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://user:password@postgres:5432/chat_db
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: change_this_secret_in_production
+      JWT_REFRESH_SECRET: change_this_refresh_secret_in_production
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - chat-network
+
+  profiles:
+    build: ./services/profiles
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://user:password@postgres:5432/chat_db
+      AUTH_SERVICE_URL: http://auth:3001
+    depends_on:
+      - postgres
+      - auth
+    networks:
+      - chat-network
+
+  messaging:
+    build: ./services/messaging
+    environment:
+      PORT: 3003
+      DATABASE_URL: postgresql://user:password@postgres:5432/chat_db
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672
+      AUTH_SERVICE_URL: http://auth:3001
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+      - auth
+    networks:
+      - chat-network
+
+  front:
+    build:
+      context: ./front
+      args:
+        VITE_AUTH_URL: http://localhost/api
+        VITE_PROFILES_URL: http://localhost/api
+        VITE_SOCKET_URL: http://localhost
+        VITE_API_URL: http://localhost/api
+    networks:
+      - chat-network
+
+
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - auth
+      - profiles
+      - messaging
+      - front
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
 
 volumes:
   postgres_data:

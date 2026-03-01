@@ -10,7 +10,7 @@
 | Phase | Description | Statut |
 |-------|-------------|--------|
 | Phase 1 | Setup monorepo | ✅ |
-| Phase 2 | Développement services | 🔴 |
+| Phase 2 | Développement services | ✅ |
 | Phase 3 | Containerisation Docker | 🔴 |
 | Phase 4 | Tests Jest + Supertest | 🔴 |
 | Phase 5 | Qualité code SonarCloud | 🔴 |
@@ -26,7 +26,7 @@
 
 ## ✅ Terminé
 <!-- Ajouter ici ce qui est fait -->
-Phase 1 terminée ✅
+Phase 1 terminée ✅------------------------------------------------
 Voici ce que tu as accompli :
 Étape	                                        Statut
 Repo GitHub créé et cloné	                    ✅
@@ -38,6 +38,16 @@ ESLint sur les 3 services	                    ✅
 docker-compose.yml (postgres, redis, rabbitmq)	✅
 Premier commit pushé sur GitHub	                ✅
 
+Phase 2 terminée ✅------------------------------------------------
+Voici ce que tu as accompli :
+Étape	                                                    Statut
+Service auth (register, login, logout, refresh, verify)	    ✅
+Service profiles (GET, PUT avec auth)	                    ✅
+Service messaging (Socket.io, historique messages)	        ✅
+Front React (login, register, chat, profil)	                ✅
+Communication inter-services (auth/verify)	                ✅
+Chat temps réel entre 2 onglets	                            ✅
+Commit pushé sur GitHub	                                    ✅
 
 ## 🔄 En cours
 <!-- Ajouter ici la phase en cours et ce qui reste -->

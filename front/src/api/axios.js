@@ -9,7 +9,7 @@ export const profilesAPI = axios.create({
 });
 
 export const messagesAPI = axios.create({
-  baseURL: import.meta.env.VITE_SOCKET_URL,
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 authAPI.interceptors.request.use((config) => {

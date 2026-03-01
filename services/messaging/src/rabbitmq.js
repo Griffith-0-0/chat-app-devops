@@ -3,11 +3,20 @@ require('dotenv').config();
 
 let channel;
 
-const connect = async () => {
-  const connection = await amqp.connect(process.env.RABBITMQ_URL);
-  channel = await connection.createChannel();
-  await channel.assertQueue('messages', { durable: true });
-  console.log('RabbitMQ connected');
+const connect = async (retries = 5, delay = 3000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const connection = await amqp.connect(process.env.RABBITMQ_URL);
+      channel = await connection.createChannel();
+      await channel.assertQueue('messages', { durable: true });
+      console.log('RabbitMQ connected');
+      return;
+    } catch (err) {
+      console.log(`RabbitMQ not ready, retrying in ${delay/1000}s... (${i + 1}/${retries})`);
+      await new Promise(res => setTimeout(res, delay));
+    }
+  }
+  throw new Error('Could not connect to RabbitMQ after retries');
 };
 
 const publish = async (message) => {
