@@ -1,4 +1,3 @@
-const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const pool = require('./db');
@@ -6,20 +5,12 @@ const { publish, connect: connectRabbitMQ } = require('./rabbitmq');
 const axios = require('axios');
 require('dotenv').config();
 
-const app = express();
-const cors = require('cors');
-app.use(express.json());
-app.use(cors());
+const app = require('./app');
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: '*' },
 });
-
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
-
-const messageRoutes = require('./routes/messages');
-app.use('/messages', messageRoutes);
 
 io.use(async (socket, next) => {
   const token = socket.handshake.auth.token;

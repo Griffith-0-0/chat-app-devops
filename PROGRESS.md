@@ -11,8 +11,8 @@
 |-------|-------------|--------|
 | Phase 1 | Setup monorepo | ✅ |
 | Phase 2 | Développement services | ✅ |
-| Phase 3 | Containerisation Docker | 🔴 |
-| Phase 4 | Tests Jest + Supertest | 🔴 |
+| Phase 3 | Containerisation Docker | ✅ |
+| Phase 4 | Tests Jest + Supertest | ✅ |
 | Phase 5 | Qualité code SonarCloud | 🔴 |
 | Phase 6 | Pipeline Jenkins | 🔴 |
 | Phase 7 | Kubernetes Minikube | 🔴 |
@@ -48,6 +48,28 @@ Front React (login, register, chat, profil)	                ✅
 Communication inter-services (auth/verify)	                ✅
 Chat temps réel entre 2 onglets	                            ✅
 Commit pushé sur GitHub	                                    ✅
+
+Phase 3 terminée ✅------------------------------------------------
+Voici ce que tu as accompli :
+Étape	                                                        Statut
+Dockerfile service auth (node:18-alpine, non-root user)	        ✅
+Dockerfile service profiles	                                    ✅
+Dockerfile service messaging (retry RabbitMQ)	                ✅
+Dockerfile front (multi-stage build Vite → Nginx)	            ✅
+.dockerignore sur tous les services	                            ✅
+nginx.conf (reverse proxy, WebSocket, API Gateway)	            ✅
+docker-compose.yml complet (tous les services)	                ✅
+Variables VITE_* via ARG/ENV dans le Dockerfile	                ✅
+App complète accessible sur http://localhost	                ✅
+Commit pushé sur GitHub	                                        ✅
+
+Phase 4 terminée ✅------------------------------------------------
+Tests unitaires auth (hash, jwt, validate)	                    ✅
+Tests d'intégration auth (register, login, health)	            ✅
+Tests d'intégration profiles (GET, PUT, auth, 401/403)	        ✅
+Tests d'intégration messaging (GET messages, auth, 401)	        ✅
+Mock axios pour authMiddleware (profiles, messaging)	        ✅
+
 
 ## 🔄 En cours
 <!-- Ajouter ici la phase en cours et ce qui reste -->

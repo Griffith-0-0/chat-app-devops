@@ -9,11 +9,15 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - chat-network
+    ports:
+      - "5432:5432"
 
   redis:
     image: redis:7-alpine
     networks:
       - chat-network
+    ports:
+      - "6379:6379"
 
   rabbitmq:
     image: rabbitmq:3-management-alpine

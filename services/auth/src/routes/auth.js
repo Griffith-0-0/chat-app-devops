@@ -1,16 +1,21 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const pool = require('../db');
 const redis = require('../redis');
+const { hashPassword, comparePassword } = require('../utils/hash');
+const { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken } = require('../utils/jwt');
+const { validateRegisterInput, validateLoginInput } = require('../utils/validate');
 require('dotenv').config();
 
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
+  const validation = validateRegisterInput(username, email, password);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.errors[0] });
+  }
   try {
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await hashPassword(password);
     const result = await pool.query(
       'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email',
       [username, email, hash]
@@ -23,20 +28,20 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  const validation = validateLoginInput(email, password);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.errors[0] });
+  }
   try {
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     const user = result.rows[0];
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const valid = await bcrypt.compare(password, user.password_hash);
+    const valid = await comparePassword(password, user.password_hash);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
-    const refreshToken = jwt.sign({ userId: user.id }, process.env.JWT_REFRESH_SECRET, {
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-    });
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
 
     res.json({ accessToken, refreshToken });
   } catch (err) {
@@ -57,10 +62,8 @@ router.post('/refresh', async (req, res) => {
   if (!refreshToken) return res.status(400).json({ error: 'No refresh token' });
 
   try {
-    const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const accessToken = jwt.sign({ userId: payload.userId }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    const payload = verifyRefreshToken(refreshToken);
+    const accessToken = generateAccessToken(payload.userId);
     res.json({ accessToken });
   } catch (err) {
     res.status(401).json({ error: 'Invalid refresh token' });
@@ -75,7 +78,7 @@ router.get('/verify', async (req, res) => {
   if (isBlacklisted) return res.status(401).json({ error: 'Token revoked' });
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = verifyAccessToken(token);
     res.json({ userId: payload.userId });
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });
