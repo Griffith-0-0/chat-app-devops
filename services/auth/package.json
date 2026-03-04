@@ -7,9 +7,11 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
     
     "test": "jest --forceExit",
-    "test:unit": "jest tests/unit --forceExit"
+    "test:unit": "jest tests/unit --forceExit",
+    "test:coverage": "jest --coverage --forceExit"
   },
   "jest": {
   "testEnvironment": "node"

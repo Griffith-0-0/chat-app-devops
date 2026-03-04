@@ -1,0 +1,114 @@
+name: SonarCloud
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: chat_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Init database
+        env:
+          PGPASSWORD: password
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql -h localhost -U user -d chat_db -f scripts/init-db.sql
+
+      - name: Auth - Install
+        working-directory: ./services/auth
+        run: npm ci
+
+      - name: Auth - Run tests with coverage
+        working-directory: ./services/auth
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/chat_db
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test_secret
+          JWT_REFRESH_SECRET: test_refresh_secret
+          JWT_EXPIRES_IN: 15m
+          JWT_REFRESH_EXPIRES_IN: 7d
+        run: npm run test:coverage
+
+      - name: Auth - SonarCloud Scan
+        working-directory: ./services/auth
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          npm install -g sonar-scanner
+          sonar-scanner
+
+      - name: Profiles - Install
+        working-directory: ./services/profiles
+        run: npm ci
+
+      - name: Profiles - Run tests with coverage
+        working-directory: ./services/profiles
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/chat_db
+          AUTH_SERVICE_URL: http://localhost:3001
+        run: npm run test:coverage
+
+      - name: Profiles - SonarCloud Scan
+        working-directory: ./services/profiles
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          npm install -g sonar-scanner
+          sonar-scanner
+
+      - name: Messaging - Install
+        working-directory: ./services/messaging
+        run: npm ci
+
+      - name: Messaging - Run tests with coverage
+        working-directory: ./services/messaging
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/chat_db
+          REDIS_URL: redis://localhost:6379
+          AUTH_SERVICE_URL: http://localhost:3001
+        run: npm run test:coverage
+
+      - name: Messaging - SonarCloud Scan
+        working-directory: ./services/messaging
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          npm install -g sonar-scanner
+          sonar-scanner
