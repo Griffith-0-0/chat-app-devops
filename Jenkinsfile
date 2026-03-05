@@ -124,9 +124,15 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     sh '''
-                        docker run --rm -v $PWD:/usr/src -w /usr/src/services/auth -e SONAR_TOKEN=$SONAR_TOKEN sonarsource/sonar-scanner-cli sonar-scanner
-                        docker run --rm -v $PWD:/usr/src -w /usr/src/services/profiles -e SONAR_TOKEN=$SONAR_TOKEN sonarsource/sonar-scanner-cli sonar-scanner
-                        docker run --rm -v $PWD:/usr/src -w /usr/src/services/messaging -e SONAR_TOKEN=$SONAR_TOKEN sonarsource/sonar-scanner-cli sonar-scanner
+                        SCANNER_VER=4.8.0.2856
+                        SCANNER_DIR="/tmp/sonar-scanner-${SCANNER_VER}-linux"
+                        if [ ! -f "${SCANNER_DIR}/bin/sonar-scanner" ]; then
+                            curl -sSLo /tmp/sonar-scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VER}-linux.zip"
+                            unzip -o /tmp/sonar-scanner.zip -d /tmp
+                        fi
+                        cd ${WORKSPACE}/services/auth && ${SCANNER_DIR}/bin/sonar-scanner -Dsonar.login=$SONAR_TOKEN
+                        cd ${WORKSPACE}/services/profiles && ${SCANNER_DIR}/bin/sonar-scanner -Dsonar.login=$SONAR_TOKEN
+                        cd ${WORKSPACE}/services/messaging && ${SCANNER_DIR}/bin/sonar-scanner -Dsonar.login=$SONAR_TOKEN
                     '''
                 }
             }
