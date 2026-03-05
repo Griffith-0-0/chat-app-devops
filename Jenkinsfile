@@ -122,7 +122,7 @@ pipeline {
         }
         stage('SonarCloud Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     sh '''
                         npm install -g sonar-scanner
                         cd services/auth && sonar-scanner -Dsonar.login=$SONAR_TOKEN
