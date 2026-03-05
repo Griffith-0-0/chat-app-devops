@@ -120,19 +120,46 @@ pipeline {
                 }
             }
         }
-        stage('SonarCloud Analysis') {
+                stage('SonarCloud Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     sh '''
-                        SCANNER_VER=4.8.0.2856
-                        SCANNER_DIR="/tmp/sonar-scanner-${SCANNER_VER}-linux"
-                        if [ ! -f "${SCANNER_DIR}/bin/sonar-scanner" ]; then
-                            curl -sSLo /tmp/sonar-scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VER}-linux.zip"
-                            unzip -o /tmp/sonar-scanner.zip -d /tmp
-                        fi
-                        cd ${WORKSPACE}/services/auth && ${SCANNER_DIR}/bin/sonar-scanner -Dsonar.login=$SONAR_TOKEN
-                        cd ${WORKSPACE}/services/profiles && ${SCANNER_DIR}/bin/sonar-scanner -Dsonar.login=$SONAR_TOKEN
-                        cd ${WORKSPACE}/services/messaging && ${SCANNER_DIR}/bin/sonar-scanner -Dsonar.login=$SONAR_TOKEN
+                        docker run --rm --platform linux/amd64 \
+                          -v $PWD:/usr/src -w /usr/src \
+                          -e SONAR_TOKEN=$SONAR_TOKEN \
+                          sonarsource/sonar-scanner-cli \
+                          sonar-scanner \
+                          -Dsonar.projectKey=chat-app_auth \
+                          -Dsonar.organization=griffith-0-0 \
+                          -Dsonar.host.url=https://sonarcloud.io \
+                          -Dsonar.sources=services/auth/src \
+                          -Dsonar.tests=services/auth/tests \
+                          -Dsonar.javascript.lcov.reportPaths=services/auth/coverage/lcov.info \
+                          -Dsonar.projectBaseDir=/usr/src
+                        docker run --rm --platform linux/amd64 \
+                          -v $PWD:/usr/src -w /usr/src \
+                          -e SONAR_TOKEN=$SONAR_TOKEN \
+                          sonarsource/sonar-scanner-cli \
+                          sonar-scanner \
+                          -Dsonar.projectKey=chat-app_profiles \
+                          -Dsonar.organization=griffith-0-0 \
+                          -Dsonar.host.url=https://sonarcloud.io \
+                          -Dsonar.sources=services/profiles/src \
+                          -Dsonar.tests=services/profiles/tests \
+                          -Dsonar.javascript.lcov.reportPaths=services/profiles/coverage/lcov.info \
+                          -Dsonar.projectBaseDir=/usr/src
+                        docker run --rm --platform linux/amd64 \
+                          -v $PWD:/usr/src -w /usr/src \
+                          -e SONAR_TOKEN=$SONAR_TOKEN \
+                          sonarsource/sonar-scanner-cli \
+                          sonar-scanner \
+                          -Dsonar.projectKey=chat-app_messaging \
+                          -Dsonar.organization=griffith-0-0 \
+                          -Dsonar.host.url=https://sonarcloud.io \
+                          -Dsonar.sources=services/messaging/src \
+                          -Dsonar.tests=services/messaging/tests \
+                          -Dsonar.javascript.lcov.reportPaths=services/messaging/coverage/lcov.info \
+                          -Dsonar.projectBaseDir=/usr/src
                     '''
                 }
             }
