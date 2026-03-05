@@ -11,3 +11,4 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/auth', authRoutes);
 
 module.exports = app;
+//test
