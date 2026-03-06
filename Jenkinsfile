@@ -124,9 +124,6 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     sh '''
-                        AUTH_TESTS=""; [ -d "services/auth/tests" ] && AUTH_TESTS="-Dsonar.tests=services/auth/tests"
-                        PROFILES_TESTS=""; [ -d "services/profiles/tests" ] && PROFILES_TESTS="-Dsonar.tests=services/profiles/tests"
-                        MESSAGING_TESTS=""; [ -d "services/messaging/tests" ] && MESSAGING_TESTS="-Dsonar.tests=services/messaging/tests"
                         docker run --rm --platform linux/amd64 \
                           -v $PWD:/usr/src -w /usr/src \
                           -e SONAR_TOKEN=$SONAR_TOKEN \
@@ -136,7 +133,6 @@ pipeline {
                           -Dsonar.organization=griffith-0-0 \
                           -Dsonar.host.url=https://sonarcloud.io \
                           -Dsonar.sources=services/auth/src \
-                          $AUTH_TESTS \
                           -Dsonar.javascript.lcov.reportPaths=services/auth/coverage/lcov.info \
                           -Dsonar.projectBaseDir=/usr/src
                         docker run --rm --platform linux/amd64 \
@@ -148,7 +144,6 @@ pipeline {
                           -Dsonar.organization=griffith-0-0 \
                           -Dsonar.host.url=https://sonarcloud.io \
                           -Dsonar.sources=services/profiles/src \
-                          $PROFILES_TESTS \
                           -Dsonar.javascript.lcov.reportPaths=services/profiles/coverage/lcov.info \
                           -Dsonar.projectBaseDir=/usr/src
                         docker run --rm --platform linux/amd64 \
@@ -160,7 +155,6 @@ pipeline {
                           -Dsonar.organization=griffith-0-0 \
                           -Dsonar.host.url=https://sonarcloud.io \
                           -Dsonar.sources=services/messaging/src \
-                          $MESSAGING_TESTS \
                           -Dsonar.javascript.lcov.reportPaths=services/messaging/coverage/lcov.info \
                           -Dsonar.projectBaseDir=/usr/src
                     '''
