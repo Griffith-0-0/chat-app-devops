@@ -11,7 +11,7 @@ const connect = async (retries = 5, delay = 3000) => {
       await channel.assertQueue('messages', { durable: true });
       console.log('RabbitMQ connected');
       return;
-    } catch (err) {
+    } catch (_err) {
       console.log(`RabbitMQ not ready, retrying in ${delay/1000}s... (${i + 1}/${retries})`);
       await new Promise(res => setTimeout(res, delay));
     }

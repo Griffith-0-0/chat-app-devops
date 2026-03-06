@@ -11,7 +11,7 @@ const authMiddleware = async (req, res, next) => {
     });
     req.userId = response.data.userId;
     next();
-  } catch (err) {
+  } catch (_err) {
     res.status(401).json({ error: 'Unauthorized' });
   }
 };
