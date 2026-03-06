@@ -16,6 +16,10 @@ export default [
       'no-console': 'warn',
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }], // Ignore les variables commençant par _
       'no-undef': 'error',
+      'no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'  // Ignore catch (_err)
+      }],
     },
   },
   pluginJs.configs.recommended,
