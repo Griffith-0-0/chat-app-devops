@@ -124,9 +124,10 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     sh '''
-                        cd services/auth && sonar-scanner && cd ../..
-                        cd services/profiles && sonar-scanner && cd ../..
-                        cd services/messaging && sonar-scanner && cd ../..
+                        npm install -g sonar-scanner
+                        (cd services/auth && sonar-scanner)
+                        (cd services/profiles && sonar-scanner)
+                        (cd services/messaging && sonar-scanner)
                     '''
                 }
             }
