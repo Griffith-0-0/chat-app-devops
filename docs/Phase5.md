@@ -26,10 +26,13 @@ Créer `sonar-project.properties` dans chaque service :
 sonar.projectKey=chat-app_auth
 sonar.projectName=Chat App - Auth Service
 sonar.sources=src
-sonar.tests=tests
 sonar.javascript.lcov.reportPaths=coverage/lcov.info
 sonar.exclusions=node_modules/**,coverage/**
+sonar.host.url=https://sonarcloud.io
+sonar.organization=griffith-0-0
 ```
+
+> **Note** : `sonar.tests=tests` peut provoquer des erreurs dans certains contextes (Jenkins-in-Docker). L'omettre si nécessaire ; SonarCloud détecte les tests via les patterns de nommage et le rapport lcov.
 
 ### Quality Gate à configurer
 Dans SonarCloud, s'assurer que le Quality Gate vérifie :
@@ -42,22 +45,33 @@ Dans SonarCloud, s'assurer que le Quality Gate vérifie :
 
 ## 5.2 ESLint
 
-### Config ESLint recommandée pour Node.js
-```json
-{
-  "env": {
-    "node": true,
-    "es2021": true,
-    "jest": true
+### Config ESLint (flat config — ESLint 9+)
+
+Avec `eslint.config.mjs` (format flat config) :
+```javascript
+import globals from 'globals';
+import pluginJs from '@eslint/js';
+
+export default [
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: { ...globals.node, ...globals.jest },  // process, Buffer, describe, it, expect
+    },
+    rules: {
+      'no-console': 'warn',
+      'no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'   // catch (_err) accepté
+      }],
+    },
   },
-  "extends": ["eslint:recommended"],
-  "rules": {
-    "no-console": "warn",
-    "no-unused-vars": "error",
-    "no-undef": "error"
-  }
-}
+  pluginJs.configs.recommended,
+];
 ```
+
+> **Important** : `globals.node` et `globals.jest` évitent les erreurs `'process' is not defined` et `'Buffer' is not defined`. `caughtErrorsIgnorePattern: '^_'` permet les blocs `catch (_err)` lorsque la variable n'est pas utilisée.
 
 ### Scripts npm à ajouter
 ```json

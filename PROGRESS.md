@@ -1,7 +1,7 @@
 # Progression TP DevOps — Chat App
 
 ## Statut global
-🟢 Phase 5 terminée — Phase 6 (Jenkins) à venir
+🟢 Phase 6 terminée — Pipeline Jenkins opérationnel
 
 ---
 
@@ -14,7 +14,7 @@
 | Phase 3 | Containerisation Docker | ✅ |
 | Phase 4 | Tests Jest + Supertest | ✅ |
 | Phase 5 | Qualité code SonarCloud | ✅ |
-| Phase 6 | Pipeline Jenkins | 🔴 |
+| Phase 6 | Pipeline Jenkins | ✅ |
 | Phase 7 | Kubernetes Minikube | 🔴 |
 | Phase 8 | Helm charts | 🔴 |
 | Phase 9 | Argo CD GitOps | 🔴 |
@@ -78,6 +78,12 @@ Dependabot (npm auth, profiles, messaging, front)              ✅
 ESLint + lint:fix sur les 3 services                           ✅
 Rapport SonarCloud visible sur sonarcloud.io                   ✅
 
+Phase 6 terminée ✅------------------------------------------------
+Jenkinsfile complet (Checkout, Detect Changed Services, Install & Lint, Tests, SonarCloud, Docker Build, Trivy, Docker Push)  ✅
+Image Jenkins Docker (Node.js 20, Docker CLI, Trivy, SonarScanner)  ✅
+jenkins/docker-compose.jenkins.yml + Dockerfile                   ✅
+Pipeline du début à la fin sur main                                ✅
+
 Points bloquants et solutions :
 | Problème | Solution |
 |----------|----------|
@@ -101,8 +107,13 @@ Points bloquants et solutions :
 
 | Problème | Solution |
 |----------|----------|
-| ESLint `'err' is defined but never used` (no-unused-vars) | Renommer `catch (err)` en `catch (_err)` dans les blocs où la variable n'est pas utilisée (verifyToken.js, auth.js). Le pattern `caughtErrorsIgnorePattern: '^_'` dans ESLint accepte les variables préfixées par `_`. |
-| SonarCloud : `The folder 'services/auth/tests' does not exist` | Rendre `sonar.tests` conditionnel dans le Jenkinsfile : ne passer `-Dsonar.tests=services/X/tests` que si le dossier existe (`[ -d "services/auth/tests" ] && AUTH_TESTS="..."`). Évite l'échec si le checkout Jenkins n'inclut pas les tests ou si la structure diffère. |
+| ESLint `'err' is defined but never used` (no-unused-vars) | Renommer `catch (err)` en `catch (_err)` dans auth, profiles, messaging. Ajouter `caughtErrorsIgnorePattern: '^_'` dans ESLint. |
+| ESLint `'process'` / `'Buffer'` is not defined (no-undef) | Remplacer `globals.browser` par `globals.node` + `globals.jest` dans eslint.config.mjs (profiles, messaging). |
+| SonarCloud : `The folder 'services/auth/tests' does not exist` | Jenkins-in-Docker : `docker run -v $PWD` monte un chemin inexistant sur l'hôte. Exécuter sonar-scanner directement (sans docker run). |
+| SonarCloud : `The folder 'services/auth/src' does not exist` | Même cause. Exécuter `sonar-scanner` en natif depuis chaque service : `(cd services/auth && sonar-scanner)`. |
+| `sonar-scanner: not found` | Ajouter `npm install -g sonar-scanner` avant les appels dans le Jenkinsfile. |
+| `cd` en cascade échoue après une erreur | Utiliser des subshells : `(cd services/auth && sonar-scanner)` pour isoler chaque `cd`. |
+| SonarCloud : `sonar.tests` provoque des erreurs | Supprimer `sonar.tests` des sonar-project.properties. |
 
 ---
 
