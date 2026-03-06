@@ -95,6 +95,16 @@ Points bloquants et solutions :
 ## ❌ Bloqué
 <!-- Décrire les blocages avec ce qui a déjà été essayé -->
 
+---
+
+## Difficultés Jenkins workflow
+
+| Problème | Solution |
+|----------|----------|
+| ESLint `'err' is defined but never used` (no-unused-vars) | Renommer `catch (err)` en `catch (_err)` dans les blocs où la variable n'est pas utilisée (verifyToken.js, auth.js). Le pattern `caughtErrorsIgnorePattern: '^_'` dans ESLint accepte les variables préfixées par `_`. |
+| SonarCloud : `The folder 'services/auth/tests' does not exist` | Rendre `sonar.tests` conditionnel dans le Jenkinsfile : ne passer `-Dsonar.tests=services/X/tests` que si le dossier existe (`[ -d "services/auth/tests" ] && AUTH_TESTS="..."`). Évite l'échec si le checkout Jenkins n'inclut pas les tests ou si la structure diffère. |
+
+---
 
 ## 📝 Questions à creuser
 <!-- Notes personnelles sur des concepts à mieux comprendre -->

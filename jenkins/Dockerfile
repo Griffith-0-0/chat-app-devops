@@ -19,4 +19,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 # Trivy
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
+# SonarScanner (évite docker run + montage volume qui échoue en Jenkins-in-Docker)
+RUN npm install -g sonar-scanner
+
 USER jenkins

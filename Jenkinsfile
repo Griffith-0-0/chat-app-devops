@@ -124,39 +124,9 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     sh '''
-                        docker run --rm --platform linux/amd64 \
-                          -v $PWD:/usr/src -w /usr/src \
-                          -e SONAR_TOKEN=$SONAR_TOKEN \
-                          sonarsource/sonar-scanner-cli \
-                          sonar-scanner \
-                          -Dsonar.projectKey=chat-app_auth \
-                          -Dsonar.organization=griffith-0-0 \
-                          -Dsonar.host.url=https://sonarcloud.io \
-                          -Dsonar.sources=services/auth/src \
-                          -Dsonar.javascript.lcov.reportPaths=services/auth/coverage/lcov.info \
-                          -Dsonar.projectBaseDir=/usr/src
-                        docker run --rm --platform linux/amd64 \
-                          -v $PWD:/usr/src -w /usr/src \
-                          -e SONAR_TOKEN=$SONAR_TOKEN \
-                          sonarsource/sonar-scanner-cli \
-                          sonar-scanner \
-                          -Dsonar.projectKey=chat-app_profiles \
-                          -Dsonar.organization=griffith-0-0 \
-                          -Dsonar.host.url=https://sonarcloud.io \
-                          -Dsonar.sources=services/profiles/src \
-                          -Dsonar.javascript.lcov.reportPaths=services/profiles/coverage/lcov.info \
-                          -Dsonar.projectBaseDir=/usr/src
-                        docker run --rm --platform linux/amd64 \
-                          -v $PWD:/usr/src -w /usr/src \
-                          -e SONAR_TOKEN=$SONAR_TOKEN \
-                          sonarsource/sonar-scanner-cli \
-                          sonar-scanner \
-                          -Dsonar.projectKey=chat-app_messaging \
-                          -Dsonar.organization=griffith-0-0 \
-                          -Dsonar.host.url=https://sonarcloud.io \
-                          -Dsonar.sources=services/messaging/src \
-                          -Dsonar.javascript.lcov.reportPaths=services/messaging/coverage/lcov.info \
-                          -Dsonar.projectBaseDir=/usr/src
+                        cd services/auth && sonar-scanner && cd ../..
+                        cd services/profiles && sonar-scanner && cd ../..
+                        cd services/messaging && sonar-scanner && cd ../..
                     '''
                 }
             }
