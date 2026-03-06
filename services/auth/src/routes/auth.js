@@ -65,7 +65,7 @@ router.post('/refresh', async (req, res) => {
     const payload = verifyRefreshToken(refreshToken);
     const accessToken = generateAccessToken(payload.userId);
     res.json({ accessToken });
-  } catch (err) {
+  } catch (_err) {
     res.status(401).json({ error: 'Invalid refresh token' });
   }
 });
@@ -80,7 +80,7 @@ router.get('/verify', async (req, res) => {
   try {
     const payload = verifyAccessToken(token);
     res.json({ userId: payload.userId });
-  } catch (err) {
+  } catch (_err) {
     res.status(401).json({ error: 'Invalid token' });
   }
 });

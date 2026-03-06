@@ -13,7 +13,7 @@ const verifyToken = async (req, res, next) => {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = payload.userId;
     next();
-  } catch (err) {
+  } catch (_err) {
     res.status(401).json({ error: 'Invalid token' });
   }
 };
