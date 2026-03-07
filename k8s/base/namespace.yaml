@@ -1,0 +1,6 @@
+# Namespace Kubernetes pour l'application Chat App
+# Regroupe tous les pods, services et ressources du projet
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chat-app

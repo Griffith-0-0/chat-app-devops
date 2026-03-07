@@ -1,4 +1,6 @@
-FROM node:18-alpine AS builder
+# Image Docker du front React (multi-stage)
+# Stage 1 : build Vite avec variables VITE_* → Stage 2 : Nginx sert /dist
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 

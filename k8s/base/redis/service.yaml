@@ -1,0 +1,12 @@
+# Service Redis sur le port 6379
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: chat-app
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379

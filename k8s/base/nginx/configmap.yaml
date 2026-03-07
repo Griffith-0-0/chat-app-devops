@@ -1,0 +1,60 @@
+# ConfigMap Nginx : configuration du reverse proxy
+# Routes : /api/auth/, /api/profiles/, /api/messages/, /socket.io/, / (front)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: chat-app
+data:
+  nginx.conf: |
+    events {
+      worker_connections 1024;
+    }
+    http {
+      upstream auth {
+        server auth:3001;
+      }
+      upstream profiles {
+        server profiles:3002;
+      }
+      upstream messaging {
+        server messaging:3003;
+      }
+      upstream front {
+        server front:80;
+      }
+      server {
+        listen 80;
+        location /api/auth/health {
+          proxy_pass http://auth/health;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+        }
+        location /api/auth/ {
+          proxy_pass http://auth/auth/;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+        }
+        location /api/profiles/ {
+          proxy_pass http://profiles/profiles/;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+        }
+        location /api/messages/ {
+          proxy_pass http://messaging/messages/;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+        }
+        location /socket.io/ {
+          proxy_pass http://messaging/socket.io/;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+        }
+        location / {
+          proxy_pass http://front/;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+        }
+      }
+    }

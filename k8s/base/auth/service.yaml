@@ -1,0 +1,13 @@
+# Service Kubernetes pour le pod Auth
+# Expose le port 3001 pour les requêtes internes au cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  namespace: chat-app
+spec:
+  selector:
+    app: auth
+  ports:
+    - port: 3001
+      targetPort: 3001

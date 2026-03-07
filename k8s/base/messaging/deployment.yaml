@@ -1,0 +1,38 @@
+# Deployment du service Messaging sur Kubernetes
+# Chat temps réel (Socket.io), historique REST, RabbitMQ pour les événements
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging
+  namespace: chat-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: messaging
+  template:
+    metadata:
+      labels:
+        app: messaging
+    spec:
+      containers:
+        - name: messaging
+          image: badrkhafif98/chat-messaging:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3003
+          envFrom:
+            - configMapRef:
+                name: messaging-config
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 30
+            periodSeconds: 10

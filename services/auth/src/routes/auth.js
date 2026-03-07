@@ -1,3 +1,8 @@
+/**
+ * Routes d'authentification du service Auth
+ * Endpoints : register, login, logout, refresh, verify.
+ * Utilise PostgreSQL pour les users, Redis pour la blacklist des tokens.
+ */
 const express = require('express');
 const pool = require('../db');
 const redis = require('../redis');
@@ -8,6 +13,7 @@ require('dotenv').config();
 
 const router = express.Router();
 
+// Inscription : validation, hash du mot de passe, insertion en BDD
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
   const validation = validateRegisterInput(username, email, password);
@@ -26,6 +32,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Connexion : vérification creds, génération access + refresh tokens
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const validation = validateLoginInput(email, password);
@@ -49,6 +56,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Déconnexion : ajoute le token à la blacklist Redis (TTL = durée de vie du token)
 router.post('/logout', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(400).json({ error: 'No token provided' });
@@ -57,6 +65,7 @@ router.post('/logout', async (req, res) => {
   res.json({ message: 'Logged out' });
 });
 
+// Rafraîchissement : échange refresh token contre nouveau access token
 router.post('/refresh', async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) return res.status(400).json({ error: 'No refresh token' });
@@ -70,6 +79,7 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
+// Vérification : valide le token et vérifie qu'il n'est pas blacklisté (utilisé par les autres services)
 router.get('/verify', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'No token provided' });

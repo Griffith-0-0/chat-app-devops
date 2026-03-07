@@ -37,36 +37,38 @@ kubectl get pods -A
 ## 7.2 Structure des manifests K8s
 
 ```
-k8s/
-├── base/
-│   ├── namespace.yaml
-│   ├── auth/
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   ├── configmap.yaml
-│   │   └── secret.yaml
-│   ├── messaging/
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   └── configmap.yaml
-│   ├── profiles/
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   └── configmap.yaml
-│   ├── front/
-│   │   ├── deployment.yaml
-│   │   └── service.yaml
-│   ├── postgres/
-│   │   ├── statefulset.yaml
-│   │   ├── service.yaml
-│   │   └── pvc.yaml
-│   ├── redis/
-│   │   ├── deployment.yaml
-│   │   └── service.yaml
-│   ├── rabbitmq/
-│   │   ├── deployment.yaml
-│   │   └── service.yaml
-│   └── ingress.yaml
+k8s/base/
+├── namespace.yaml           # Namespace chat-app
+├── ingress.yaml             # Ingress → nginx (point d'entrée unique)
+├── nginx/                   # API Gateway (reverse proxy interne)
+│   ├── configmap.yaml       # Configuration nginx.conf
+│   ├── deployment.yaml
+│   └── service.yaml
+├── auth/
+│   ├── configmap.yaml
+│   ├── secret.yaml
+│   ├── deployment.yaml
+│   └── service.yaml
+├── profiles/
+│   ├── configmap.yaml
+│   ├── deployment.yaml
+│   └── service.yaml
+├── messaging/
+│   ├── configmap.yaml
+│   ├── deployment.yaml
+│   └── service.yaml
+├── front/
+│   ├── deployment.yaml
+│   └── service.yaml
+├── postgres/
+│   ├── statefulset.yaml     # Volume persistant via volumeClaimTemplates
+│   └── service.yaml
+├── redis/
+│   ├── deployment.yaml
+│   └── service.yaml
+└── rabbitmq/
+    ├── deployment.yaml
+    └── service.yaml
 ```
 
 ---
@@ -103,6 +105,7 @@ spec:
       containers:
         - name: auth
           image: ton-username/chat-auth:latest
+          imagePullPolicy: Never   # En dev local : utiliser l'image chargée dans Minikube
           ports:
             - containerPort: 3001
           envFrom:
@@ -150,8 +153,10 @@ metadata:
   namespace: chat-app
 data:
   PORT: "3001"
-  DATABASE_URL: "postgresql://user:pass@postgres:5432/auth_db"
+  DATABASE_URL: "postgresql://user:password@postgres:5432/chat_db"
   REDIS_URL: "redis://redis:6379"
+  JWT_EXPIRES_IN: "15m"
+  JWT_REFRESH_EXPIRES_IN: "7d"
 ```
 
 ### Secret
@@ -169,7 +174,15 @@ data:
 ```
 > Encoder en base64 : `echo -n "ma_valeur" | base64`
 
-### Ingress
+### Nginx — API Gateway
+
+L'Ingress Minikube n'accepte pas les chemins regex ni `configuration-snippet`. On déploie donc un service **nginx** interne qui fait le routage (comme dans docker-compose).
+
+**ConfigMap nginx** : Contient `nginx.conf` avec les locations `/api/auth/`, `/api/profiles/`, `/api/messages/`, `/socket.io/`, `/`.
+
+**Deployment + Service nginx** : Conteneur `nginx:alpine` avec le ConfigMap monté.
+
+### Ingress (point d'entrée unique → nginx)
 ```yaml
 # k8s/base/ingress.yaml
 apiVersion: networking.k8s.io/v1
@@ -178,7 +191,6 @@ metadata:
   name: chat-ingress
   namespace: chat-app
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
@@ -188,52 +200,70 @@ spec:
     - host: chat-app.local
       http:
         paths:
-          - path: /api/auth(/|$)(.*)
+          - path: /
             pathType: Prefix
             backend:
               service:
-                name: auth
-                port:
-                  number: 3001
-          - path: /api/messages(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: messaging
-                port:
-                  number: 3003
-          - path: /api/profiles(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: profiles
-                port:
-                  number: 3002
-          - path: /(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: front
+                name: nginx
                 port:
                   number: 80
 ```
 
 ---
 
-## 7.4 Ajouter le host local
+## 7.4 Exposer l'accès (minikube tunnel + /etc/hosts)
 
+Avec le driver Docker, l'IP Minikube n'est pas routable depuis l'hôte. Il faut utiliser **minikube tunnel**.
+
+**1. Lancer le tunnel** (garder le terminal ouvert) :
 ```bash
-# Récupérer l'IP de Minikube
-minikube ip
-# Ex: 192.168.49.2
+minikube tunnel
+# Entrer le mot de passe sudo si demandé
+```
 
-# Ajouter dans /etc/hosts
-echo "192.168.49.2 chat-app.local" | sudo tee -a /etc/hosts
+**2. Configurer /etc/hosts** (avec `127.0.0.1`, pas l'IP Minikube) :
+```bash
+sudo sed -i '' '/chat-app.local/d' /etc/hosts
+echo "127.0.0.1 chat-app.local" | sudo tee -a /etc/hosts
 ```
 
 ---
 
-## 7.5 Ajouter des health checks dans chaque service
+## 7.5 Construire et charger les images (dev local)
+
+Les images doivent être présentes dans Minikube. Méthode recommandée :
+
+```bash
+# Construire directement dans Minikube
+minikube image build -t ton-username/chat-auth:latest ./services/auth
+minikube image build -t ton-username/chat-profiles:latest ./services/profiles
+minikube image build -t ton-username/chat-messaging:latest ./services/messaging
+
+# Front : build avec les bonnes URLs
+docker build -t ton-username/chat-front:latest \
+  --build-arg VITE_AUTH_URL=http://chat-app.local/api \
+  --build-arg VITE_PROFILES_URL=http://chat-app.local/api \
+  --build-arg VITE_SOCKET_URL=http://chat-app.local \
+  --build-arg VITE_API_URL=http://chat-app.local/api \
+  ./front
+minikube image load ton-username/chat-front:latest
+```
+
+> Le front nécessite **Node.js 20** (Vite) : utiliser `node:20-alpine` dans le Dockerfile.
+
+---
+
+## 7.6 Initialiser la base Postgres
+
+Après que le pod `postgres-0` soit en état `Running` :
+
+```bash
+kubectl exec -n chat-app -i postgres-0 -- psql -U user -d chat_db < scripts/init-db.sql
+```
+
+---
+
+## 7.7 Health checks dans chaque service
 
 Chaque service doit exposer une route `/health` :
 ```javascript
@@ -264,6 +294,17 @@ kubectl exec -it deployment/auth -n chat-app -- sh
 # Voir les events (utile pour débugger)
 kubectl get events -n chat-app --sort-by='.lastTimestamp'
 ```
+
+---
+
+## Points d'attention (Minikube + driver Docker)
+
+| Problème | Solution |
+|----------|----------|
+| **ImagePullBackOff** | Utiliser `minikube image build` et `imagePullPolicy: Never` |
+| **Timeout sur chat-app.local** | Lancer `minikube tunnel` et utiliser `127.0.0.1` dans /etc/hosts |
+| **Ingress regex refusé** | Utiliser nginx comme API Gateway (tout le routage dans nginx.conf) |
+| **Front build échoue (Vite)** | Passer à `node:20-alpine` dans le Dockerfile du front |
 
 ---
 

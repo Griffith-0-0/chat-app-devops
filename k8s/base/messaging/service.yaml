@@ -1,0 +1,13 @@
+# Service Kubernetes pour le pod Messaging
+# Expose le port 3003 (HTTP + WebSocket)
+apiVersion: v1
+kind: Service
+metadata:
+  name: messaging
+  namespace: chat-app
+spec:
+  selector:
+    app: messaging
+  ports:
+    - port: 3003
+      targetPort: 3003

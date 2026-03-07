@@ -1,0 +1,38 @@
+# Deployment du service Profiles sur Kubernetes
+# CRUD profils (display_name, avatar, status), appelle le service Auth pour vérifier les tokens
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: profiles
+  namespace: chat-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: profiles
+  template:
+    metadata:
+      labels:
+        app: profiles
+    spec:
+      containers:
+        - name: profiles
+          image: badrkhafif98/chat-profiles:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: profiles-config
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 30
+            periodSeconds: 10

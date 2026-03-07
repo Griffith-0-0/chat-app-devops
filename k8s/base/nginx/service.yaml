@@ -1,0 +1,12 @@
+# Service Nginx : point d'entrée unique (port 80) vers auth, profiles, messaging, front
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: chat-app
+spec:
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 80

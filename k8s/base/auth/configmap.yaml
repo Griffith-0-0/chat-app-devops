@@ -1,0 +1,13 @@
+# ConfigMap Auth : variables d'environnement non sensibles
+# PORT, DATABASE_URL, REDIS_URL, JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-config
+  namespace: chat-app
+data:
+  PORT: "3001"
+  DATABASE_URL: "postgresql://user:password@postgres:5432/chat_db"
+  REDIS_URL: "redis://redis:6379"
+  JWT_EXPIRES_IN: "15m"
+  JWT_REFRESH_EXPIRES_IN: "7d"
