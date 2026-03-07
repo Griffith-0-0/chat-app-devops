@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: badrkhafif98/chat-profiles
+  tag: latest
+  pullPolicy: Never
+
+service:
+  port: 3002
+
+env:
+  PORT: "3002"
+  DATABASE_URL: "postgresql://user:password@postgres:5432/chat_db"
+  AUTH_SERVICE_URL: "http://auth:3001"
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"

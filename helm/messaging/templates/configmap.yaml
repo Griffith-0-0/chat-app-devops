@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: messaging-config
+  namespace: chat-app
+data:
+  PORT: {{ .Values.env.PORT | quote }}
+  DATABASE_URL: {{ .Values.env.DATABASE_URL | quote }}
+  REDIS_URL: {{ .Values.env.REDIS_URL | quote }}
+  RABBITMQ_URL: {{ .Values.env.RABBITMQ_URL | quote }}
+  AUTH_SERVICE_URL: {{ .Values.env.AUTH_SERVICE_URL | quote }}
