@@ -1,7 +1,7 @@
 # Progression TP DevOps — Chat App
 
 ## Statut global
-🟢 Phase 6 terminée — Pipeline Jenkins opérationnel
+🟢 Phase 9 terminée — Argo CD GitOps opérationnel
 
 ---
 
@@ -15,9 +15,9 @@
 | Phase 4 | Tests Jest + Supertest | ✅ |
 | Phase 5 | Qualité code SonarCloud | ✅ |
 | Phase 6 | Pipeline Jenkins | ✅ |
-| Phase 7 | Kubernetes Minikube | 🔴 |
-| Phase 8 | Helm charts | 🔴 |
-| Phase 9 | Argo CD GitOps | 🔴 |
+| Phase 7 | Kubernetes Minikube | ✅ |
+| Phase 8 | Helm charts | ✅ |
+| Phase 9 | Argo CD GitOps | ✅ |
 | Phase 10 | Monitoring Prometheus + Grafana + Loki | 🔴 |
 | Phase 11 | Alerting AlertManager | 🔴 |
 | Phase 12 | Sécurité | 🔴 |
@@ -84,7 +84,27 @@ Image Jenkins Docker (Node.js 20, Docker CLI, Trivy, SonarScanner)  ✅
 jenkins/docker-compose.jenkins.yml + Dockerfile                   ✅
 Pipeline du début à la fin sur main                                ✅
 
-Points bloquants et solutions :
+Phase 7 terminée ✅------------------------------------------------
+Manifests K8s (k8s/base/), Minikube, Ingress, nginx API Gateway      ✅
+Postgres (StatefulSet), Redis, RabbitMQ                              ✅
+Déploiement auth, profiles, messaging, front                         ✅
+App accessible sur http://chat-app.local (minikube tunnel)           ✅
+Rapport détaillé → repport/phase7.md                                 ✅
+
+Phase 8 terminée ✅------------------------------------------------
+Helm charts auth, profiles, messaging, front                         ✅
+helm lint OK, resources CPU/mémoire (QoS Burstable)                  ✅
+Changement de tag + helm upgrade + helm rollback validés             ✅
+Rapport détaillé → repport/phase8.md                                 ✅
+
+Phase 9 terminée ✅------------------------------------------------
+Argo CD installé sur Minikube                                        ✅
+Repo GitHub connecté (chat-app-devops, public)                       ✅
+Applications chat-auth, chat-profiles, chat-messaging, chat-front    ✅
+Sync auto + selfHeal validés (modif Git, kubectl scale)              ✅
+Rapport détaillé → repport/phase9.md                                 ✅
+
+Points bloquants et solutions (Phase 6) :
 | Problème | Solution |
 |----------|----------|
 | Dependencies lock file not found | Retirer `cache: 'npm'` de setup-node (monorepo sans package-lock à la racine) |
