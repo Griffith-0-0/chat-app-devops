@@ -12,7 +12,7 @@ env:
   PORT: "3001"
   DATABASE_URL: "postgresql://user:password@postgres:5432/chat_db"
   REDIS_URL: "redis://redis:6379"
-  JWT_EXPIRES_IN: "15m"
+  JWT_EXPIRES_IN: "16m"
   JWT_REFRESH_EXPIRES_IN: "7d"
 
 secrets:
