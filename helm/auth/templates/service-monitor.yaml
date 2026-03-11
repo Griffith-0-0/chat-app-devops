@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: auth-monitor
+  namespace: chat-app
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: auth
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

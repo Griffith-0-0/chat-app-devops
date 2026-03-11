@@ -1,3 +1,5 @@
+# Image Docker du service Profiles
+# Node 18 Alpine, utilisateur non-root, port 3002
 FROM node:18-alpine
 
 WORKDIR /app

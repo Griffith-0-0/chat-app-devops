@@ -1,3 +1,5 @@
+# Dependabot : mises à jour automatiques des dépendances npm
+# Scan hebdomadaire des packages auth, profiles, messaging, front
 version: 2
 updates:
   - package-ecosystem: "npm"

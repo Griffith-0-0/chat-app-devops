@@ -1,3 +1,8 @@
+/**
+ * Middleware de vérification du token JWT
+ * Vérifie la présence du token, qu'il n'est pas blacklisté (logout), puis décode le payload.
+ * Injecte req.userId pour les routes protégées. Utilisé par profiles et messaging.
+ */
 const jwt = require('jsonwebtoken');
 const redis = require('../redis');
 require('dotenv').config();
@@ -19,3 +24,5 @@ const verifyToken = async (req, res, next) => {
 };
 
 module.exports = verifyToken;
+
+/** test */

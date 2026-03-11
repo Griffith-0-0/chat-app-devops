@@ -1,3 +1,7 @@
+/**
+ * Client RabbitMQ pour le service Messaging
+ * Publie les événements (ex: new_message) dans la queue 'messages'. Connexion avec retry pour démarrage Docker.
+ */
 const amqp = require('amqplib');
 require('dotenv').config();
 

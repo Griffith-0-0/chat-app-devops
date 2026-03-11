@@ -6,6 +6,7 @@
 const express = require('express');
 const pool = require('../db');
 const redis = require('../redis');
+const metrics = require('../metrics');
 const { hashPassword, comparePassword } = require('../utils/hash');
 const { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken } = require('../utils/jwt');
 const { validateRegisterInput, validateLoginInput } = require('../utils/validate');
@@ -26,6 +27,7 @@ router.post('/register', async (req, res) => {
       'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email',
       [username, email, hash]
     );
+    metrics.registersTotal.inc();
     res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -42,14 +44,21 @@ router.post('/login', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     const user = result.rows[0];
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      metrics.failedLoginsTotal.inc();
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     const valid = await comparePassword(password, user.password_hash);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!valid) {
+      metrics.failedLoginsTotal.inc();
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
+    metrics.loginsTotal.inc();
     res.json({ accessToken, refreshToken });
   } catch (err) {
     res.status(500).json({ error: err.message });

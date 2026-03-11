@@ -1,3 +1,6 @@
+// Pipeline CI/CD Jenkins pour Chat App
+// Étapes : Checkout → Détection services modifiés → Lint → Tests → SonarCloud → Docker Build → Trivy → Docker Push
+// Build uniquement les services dont le code a changé (git diff)
 pipeline {
     agent any
 

@@ -1,3 +1,7 @@
+/**
+ * Tests unitaires des utilitaires JWT
+ * Vérifie génération et vérification des access/refresh tokens.
+ */
 const {
   generateAccessToken,
   generateRefreshToken,

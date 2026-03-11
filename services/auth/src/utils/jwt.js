@@ -1,3 +1,7 @@
+/**
+ * Utilitaires JWT pour le service Auth
+ * Génération et vérification des access tokens (courte durée) et refresh tokens (longue durée).
+ */
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 

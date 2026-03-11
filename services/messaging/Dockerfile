@@ -1,3 +1,5 @@
+# Image Docker du service Messaging
+# Node 18 Alpine, utilisateur non-root, port 3003
 FROM node:18-alpine
 
 WORKDIR /app

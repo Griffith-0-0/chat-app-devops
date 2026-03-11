@@ -1,8 +1,16 @@
+/**
+ * Point d'entrée du service Messaging
+ * Combine Express (API REST) et Socket.io (temps réel). Gère les messages de chat par room.
+ * Auth via service Auth, stockage PostgreSQL, événements publiés sur RabbitMQ.
+ */
+require("./instrument.js");
+
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const pool = require('./db');
 const { publish, connect: connectRabbitMQ } = require('./rabbitmq');
 const axios = require('axios');
+const metrics = require('./metrics');
 require('dotenv').config();
 
 const app = require('./app');
@@ -12,6 +20,7 @@ const io = new Server(httpServer, {
   cors: { origin: '*' },
 });
 
+// Middleware Socket.io : vérifie le token auprès du service Auth avant d'accepter la connexion
 io.use(async (socket, next) => {
   const token = socket.handshake.auth.token;
   if (!token) return next(new Error('No token'));
@@ -26,7 +35,9 @@ io.use(async (socket, next) => {
   }
 });
 
+// Événements WebSocket : join_room, send_message, leave_room
 io.on('connection', (socket) => {
+  metrics.activeConnections.inc();
   console.log(`User connected: ${socket.userId}`);
 
   socket.on('join_room', ({ roomId }) => {
@@ -41,6 +52,7 @@ io.on('connection', (socket) => {
         [roomId, socket.userId, content]
       );
       const message = result.rows[0];
+      metrics.messagesTotal.inc({ room_id: roomId || 'unknown' });
       io.to(roomId).emit('new_message', message);
       await publish({ type: 'new_message', message });
     } catch (err) {
@@ -54,6 +66,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    metrics.activeConnections.dec();
     console.log(`User disconnected: ${socket.userId}`);
   });
 });

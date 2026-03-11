@@ -3,9 +3,12 @@ kind: Service
 metadata:
   name: profiles
   namespace: chat-app
+  labels:
+    app: profiles
 spec:
   selector:
     app: profiles
   ports:
-    - port: {{ .Values.service.port }}
+    - name: http
+      port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.port }}

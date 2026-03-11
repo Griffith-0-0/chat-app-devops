@@ -1,3 +1,7 @@
+/**
+ * Configuration ESLint pour le service Auth
+ * Règles : no-console warn, no-unused-vars avec exception pour catch (_err), globals Node + Jest.
+ */
 import globals from 'globals';
 import pluginJs from '@eslint/js';
 

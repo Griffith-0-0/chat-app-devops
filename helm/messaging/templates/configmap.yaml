@@ -9,3 +9,4 @@ data:
   REDIS_URL: {{ .Values.env.REDIS_URL | quote }}
   RABBITMQ_URL: {{ .Values.env.RABBITMQ_URL | quote }}
   AUTH_SERVICE_URL: {{ .Values.env.AUTH_SERVICE_URL | quote }}
+  SENTRY_DSN: {{ .Values.env.SENTRY_DSN | quote }}

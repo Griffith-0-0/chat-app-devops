@@ -1,3 +1,7 @@
+/**
+ * Page profil utilisateur
+ * GET/PUT profils via profilesAPI, affiche et édite display_name, status.
+ */
 import { useState, useEffect } from 'react';
 import { profilesAPI } from '../api/axios';
 import { useAuth } from '../context/AuthContext';

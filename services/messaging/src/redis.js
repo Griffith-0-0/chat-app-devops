@@ -1,3 +1,7 @@
+/**
+ * Client Redis pour le service Messaging
+ * Disponible pour cache, rate limiting ou rooms actives (actuellement utilisé par RabbitMQ côté events).
+ */
 const { createClient } = require('redis');
 require('dotenv').config();
 

@@ -1,3 +1,7 @@
+/**
+ * Tests d'intégration du service Profiles
+ * Vérifie GET/PUT profils, auth, 403/401. Mock axios pour simuler le service Auth.
+ */
 const request = require('supertest');
 const axios = require('axios');
 const app = require('../src/app');

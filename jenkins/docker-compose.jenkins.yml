@@ -1,3 +1,6 @@
+# Docker Compose pour lancer Jenkins en local
+# Monte le socket Docker pour que Jenkins puisse builder et pusher des images
+# Ports : 8080 (UI), 50000 (agents)
 version: '3.8'
 services:
   jenkins:

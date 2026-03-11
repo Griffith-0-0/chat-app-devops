@@ -1,3 +1,7 @@
+/**
+ * Page de chat temps réel
+ * Connexion Socket.io (join_room, send_message), historique via messagesAPI, affichage des messages.
+ */
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { messagesAPI } from '../api/axios';

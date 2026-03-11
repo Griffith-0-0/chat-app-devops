@@ -1,3 +1,5 @@
+# Workflow GitHub Actions : analyse SonarCloud
+# Déclenché sur push/PR vers main. Lance tests + SonarCloud pour auth, profiles, messaging.
 name: SonarCloud
 
 on:

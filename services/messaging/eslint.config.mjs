@@ -1,3 +1,7 @@
+/**
+ * Configuration ESLint pour le service Messaging
+ * Règles recommandées, globals Node + Jest, no-unused-vars avec exception pour catch (_err).
+ */
 import js from "@eslint/js";
 import globals from "globals";
 import { defineConfig } from "eslint/config";

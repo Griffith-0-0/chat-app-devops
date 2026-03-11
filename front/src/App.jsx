@@ -1,3 +1,7 @@
+/**
+ * Composant App (template Vite par défaut)
+ * L'app utilise main.jsx avec routes directes ; ce fichier peut être réutilisé ou supprimé.
+ */
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'

@@ -1,8 +1,10 @@
+# Image Jenkins custom : LTS + Docker CLI + Node.js 20 + Trivy + SonarScanner
+# Permet au pipeline de build des images, scanner avec Trivy, lancer SonarCloud
 FROM jenkins/jenkins:lts
 
 USER root
 
-# Docker CLI
+# Docker CLI (pour docker build, docker push depuis le pipeline)
 RUN apt-get update && \
     apt-get install -y ca-certificates curl gnupg && \
     install -m 0755 -d /etc/apt/keyrings && \

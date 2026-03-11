@@ -18,6 +18,7 @@ env:
 secrets:
   JWT_SECRET: ""
   JWT_REFRESH_SECRET: ""
+  SENTRY_DSN: "https://d3ce1b2a08691477cd1ff1dec265f4cf@o4511023079882752.ingest.de.sentry.io/4511023094693968"
 
 resources:
   requests:

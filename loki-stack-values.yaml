@@ -1,0 +1,11 @@
+# Loki stack values - correctifs pour intégration Grafana
+# 1. isDefault: false → évite conflit avec Prometheus (déjà default dans kube-prometheus-stack)
+# 2. image tag 2.9.3 → compatible avec le health check Grafana 12 (vector(1)+vector(1))
+loki:
+  enabled: true
+  isDefault: false
+  image:
+    tag: "2.9.3"
+
+promtail:
+  enabled: true

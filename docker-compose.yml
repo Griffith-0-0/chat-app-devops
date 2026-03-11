@@ -1,3 +1,5 @@
+# Docker Compose : environnement local complet de la Chat App
+# Postgres, Redis, RabbitMQ, auth, profiles, messaging, front, nginx (API Gateway)
 services:
   postgres:
     image: postgres:15-alpine

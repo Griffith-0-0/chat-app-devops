@@ -1,3 +1,7 @@
+/**
+ * Tests d'intégration du service Messaging
+ * Vérifie GET /messages/:roomId, auth, 401. Mock axios pour le service Auth.
+ */
 const request = require('supertest');
 const axios = require('axios');
 const app = require('../src/app');

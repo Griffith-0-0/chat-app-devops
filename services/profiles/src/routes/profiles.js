@@ -1,10 +1,17 @@
+/**
+ * Routes CRUD du service Profiles
+ * GET / : liste tous les profils. GET /:userId : un profil. PUT /:userId : créer/mettre à jour (protégé, ownership vérifié).
+ */
 const express = require('express');
 const pool = require('../db');
 const authMiddleware = require('../middleware/authMiddleware');
+const metrics = require('../metrics');
 
 const router = express.Router();
 
+// Liste tous les profils (public)
 router.get('/', async (req, res) => {
+  metrics.requestsTotal.inc({ type: 'list' });
   try {
     const result = await pool.query('SELECT user_id, display_name, avatar_url, status FROM profiles');
     res.json(result.rows);
@@ -13,7 +20,9 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Profil par userId (public)
 router.get('/:userId', async (req, res) => {
+  metrics.requestsTotal.inc({ type: 'get' });
   try {
     const result = await pool.query(
       'SELECT user_id, display_name, avatar_url, status FROM profiles WHERE user_id = $1',
@@ -26,6 +35,7 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
+// Créer ou mettre à jour son propre profil (auth requise, vérification userId)
 router.put('/:userId', authMiddleware, async (req, res) => {
   const { display_name, avatar_url, status } = req.body;
   if (req.userId !== req.params.userId) {
@@ -40,6 +50,7 @@ router.put('/:userId', authMiddleware, async (req, res) => {
        RETURNING *`,
       [req.params.userId, display_name, avatar_url, status]
     );
+    metrics.updatesTotal.inc();
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });

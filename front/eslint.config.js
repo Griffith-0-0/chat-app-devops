@@ -1,3 +1,7 @@
+/**
+ * Configuration ESLint pour le front React
+ * Règles : react-hooks, react-refresh, globals browser, no-unused-vars.
+ */
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'

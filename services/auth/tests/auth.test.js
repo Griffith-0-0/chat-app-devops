@@ -1,3 +1,7 @@
+/**
+ * Tests d'intégration du service Auth
+ * Vérifie register, login, health check. Utilise Supertest pour simuler les requêtes HTTP.
+ */
 const request = require('supertest');
 const app = require('../src/app');
 

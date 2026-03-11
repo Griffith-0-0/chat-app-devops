@@ -1,3 +1,7 @@
+/**
+ * Contexte d'authentification global
+ * Expose user, token, login, register, logout. Persiste les tokens dans localStorage.
+ */
 import { createContext, useContext, useState } from 'react';
 import { authAPI } from '../api/axios';
 

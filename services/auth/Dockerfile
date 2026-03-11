@@ -1,3 +1,5 @@
+# Image Docker du service Auth
+# Node 18 Alpine, utilisateur non-root, port 3001
 FROM node:18-alpine
 
 WORKDIR /app

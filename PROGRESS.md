@@ -18,7 +18,7 @@
 | Phase 7 | Kubernetes Minikube | ✅ |
 | Phase 8 | Helm charts | ✅ |
 | Phase 9 | Argo CD GitOps | ✅ |
-| Phase 10 | Monitoring Prometheus + Grafana + Loki | 🔴 |
+| Phase 10 | Monitoring Prometheus + Grafana + Loki | 🟡 En cours |
 | Phase 11 | Alerting AlertManager | 🔴 |
 | Phase 12 | Sécurité | 🔴 |
 
@@ -116,7 +116,7 @@ Points bloquants et solutions (Phase 6) :
 
 
 ## 🔄 En cours
-<!-- Ajouter ici la phase en cours et ce qui reste -->
+Phase 10 — Monitoring : Prometheus + Grafana installés, métriques auth intégrées. Reste : profiles, messaging, ServiceMonitor, Loki, Sentry, dashboards. Rapport → repport/phase10.md
 
 ## ❌ Bloqué
 <!-- Décrire les blocages avec ce qui a déjà été essayé -->

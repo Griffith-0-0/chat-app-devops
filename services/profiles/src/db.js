@@ -1,3 +1,7 @@
+/**
+ * Connexion PostgreSQL pour le service Profiles
+ * Stocke les profils : user_id, display_name, avatar_url, status.
+ */
 const { Pool } = require('pg');
 require('dotenv').config();
 

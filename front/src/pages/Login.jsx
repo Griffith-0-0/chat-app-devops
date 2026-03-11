@@ -1,4 +1,22 @@
+/**
+ * Page de connexion
+ * Formulaire email/mot de passe, appelle authAPI /auth/login, redirige vers /chat.
+ */
 import { useState } from 'react';
+
+// Bouton de test Sentry (à retirer en production)
+function ErrorButton() {
+  return (
+    <button
+      type="button"
+      onClick={() => { throw new Error('This is your first error!'); }}
+      className="mt-4 w-full py-2 px-4 rounded-xl border border-amber-500/50 text-amber-400 text-sm hover:bg-amber-500/10 transition-colors"
+    >
+      Test Sentry (Break the world)
+    </button>
+  );
+}
+
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -78,6 +96,8 @@ export default function Login() {
               {loading ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
+
+          <ErrorButton />
 
           <p className="mt-6 text-center text-slate-400 text-sm">
             Pas de compte ?{' '}

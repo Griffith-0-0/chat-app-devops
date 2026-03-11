@@ -1,3 +1,7 @@
+/**
+ * Middleware d'authentification pour le service Profiles
+ * Appelle le service Auth (/auth/verify) pour valider le token. Injecte req.userId.
+ */
 const axios = require('axios');
 require('dotenv').config();
 

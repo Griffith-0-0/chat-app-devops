@@ -1,3 +1,7 @@
+/**
+ * Tests unitaires des utilitaires hash (bcrypt)
+ * Vérifie hashPassword et comparePassword.
+ */
 const { hashPassword, comparePassword } = require('../../src/utils/hash');
 
 describe('hash utils', () => {

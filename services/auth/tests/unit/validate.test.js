@@ -1,3 +1,7 @@
+/**
+ * Tests unitaires de la validation des entrées register/login
+ * Vérifie les règles de validation (username, email, password).
+ */
 const { validateRegisterInput, validateLoginInput } = require('../../src/utils/validate');
 
 describe('validate utils', () => {

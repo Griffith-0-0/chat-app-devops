@@ -1,3 +1,6 @@
+-- Script d'initialisation de la base de données (PostgreSQL)
+-- Exécuté avant les tests en CI (GitHub Actions, Jenkins)
+-- Tables : users (auth), profiles, messages (messaging)
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   username VARCHAR(50) UNIQUE NOT NULL,

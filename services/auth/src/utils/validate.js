@@ -1,3 +1,7 @@
+/**
+ * Validation des entrées utilisateur pour register et login
+ * Vérifie format username, email, longueur mot de passe.
+ */
 function validateRegisterInput(username, email, password) {
   const errors = [];
 

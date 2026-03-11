@@ -44,9 +44,68 @@ Nouveaux pods déployés
 
 ---
 
-## 2. Étapes et commandes utilisées
+## 2. Redémarrer le cluster depuis zéro (après `minikube stop`)
 
-### 2.1 Installer Argo CD sur Minikube
+Après un arrêt de Minikube, exécuter ces commandes dans l'ordre pour tout redémarrer :
+
+```bash
+# 1. Démarrer Minikube
+minikube start --driver=docker --cpus=4 --memory=6g
+
+# 2. Activer les addons
+minikube addons enable ingress
+minikube addons enable metrics-server
+
+# 3. Déployer l'infra (namespace, postgres, redis, rabbitmq, nginx)
+kubectl apply -f k8s/base/namespace.yaml
+kubectl apply -f k8s/base/postgres/
+kubectl apply -f k8s/base/redis/
+kubectl apply -f k8s/base/rabbitmq/
+kubectl apply -f k8s/base/nginx/
+
+# 4. Builder et charger les images dans Minikube
+eval $(minikube docker-env)
+docker build -t badrkhafif98/chat-auth:latest ./services/auth
+docker build -t badrkhafif98/chat-profiles:latest ./services/profiles
+docker build -t badrkhafif98/chat-messaging:latest ./services/messaging
+docker build -t badrkhafif98/chat-front:latest ./front
+
+# 5. Déployer les services via Helm
+helm upgrade --install auth helm/auth -n chat-app --create-namespace
+helm upgrade --install profiles helm/profiles -n chat-app
+helm upgrade --install messaging helm/messaging -n chat-app
+helm upgrade --install front helm/front -n chat-app
+
+# 6. Appliquer l'Ingress
+kubectl apply -f k8s/base/ingress.yaml
+
+# 7. Configurer le host local (à exécuter une fois)
+echo "$(minikube ip) chat-app.local" | sudo tee -a /etc/hosts
+
+# 8. Tunnel (laisser tourner dans un terminal séparé)
+minikube tunnel
+```
+
+**Si Argo CD est déjà installé** : après l'étape 3, redémarrer Argo CD puis les Applications se re-synchroniseront :
+```bash
+kubectl create namespace argocd 2>/dev/null || true
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl port-forward svc/argocd-server -n argocd 8090:443
+```
+
+**Vérification :**
+```bash
+kubectl get pods -n chat-app
+kubectl get ingress -n chat-app
+```
+
+L'app est accessible sur **http://chat-app.local** (avec `minikube tunnel` actif).
+
+---
+
+## 3. Étapes et commandes utilisées
+
+### 3.1 Installer Argo CD sur Minikube
 
 ```bash
 kubectl create namespace argocd
@@ -62,16 +121,23 @@ kubectl port-forward svc/argocd-server -n argocd 8090:443
 
 → Argo CD accessible sur **https://localhost:8090**
 
-### 2.2 Récupérer le mot de passe admin
+### 3.2 Se connecter à Argo CD
 
+**URL :** https://localhost:8090 (avec `kubectl port-forward svc/argocd-server -n argocd 8090:443` actif)
+
+| Champ | Valeur |
+|-------|--------|
+| **Username** | `admin` |
+| **Password** | Voir commande ci-dessous |
+
+**Récupérer le mot de passe** (à exécuter si oublié) :
 ```bash
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 
-- **Username** : `admin`
-- **Password** : (sortie de la commande ci-dessus)
+> Le mot de passe s'affiche dans le terminal. Le `%` en fin de ligne (prompt zsh) n'en fait pas partie.
 
-### 2.3 Connecter le repo GitHub
+### 3.3 Connecter le repo GitHub
 
 **Via l'UI** (Settings → Repositories → Connect Repo) :
 - **Repository URL** : `https://github.com/Griffith-0-0/chat-app-devops`
@@ -82,7 +148,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 argocd repo add https://github.com/Griffith-0-0/chat-app-devops
 ```
 
-### 2.4 Créer les Applications Argo CD
+### 3.4 Créer les Applications Argo CD
 
 **Via l'UI** (New App) — pour chaque service :
 
@@ -101,15 +167,15 @@ Paramètres communs :
 - **Destination** : in-cluster
 - **CreateNamespace** : true (pour chat-app)
 
-### 2.5 Prérequis avant sync
+### 3.5 Prérequis avant sync
 
 L'infrastructure (postgres, redis, rabbitmq) doit être déployée via `kubectl apply` avant que les apps Argo CD ne sync. Argo CD gère uniquement les Helm charts des services applicatifs.
 
 ---
 
-## 3. Validation du flux GitOps
+## 4. Validation du flux GitOps
 
-### 3.1 Modification de values.yaml et auto-sync
+### 4.1 Modification de values.yaml et auto-sync
 
 ```bash
 # Modifier helm/auth/values.yaml (ex. JWT_EXPIRES_IN: "16m")
@@ -124,7 +190,7 @@ Résultat attendu : chat-auth passe à **OutOfSync** puis **Synced** après appl
 
 ---
 
-## 4. Validation de la self-heal
+## 5. Validation de la self-heal
 
 ```bash
 kubectl scale deployment auth -n chat-app --replicas=2
@@ -137,7 +203,7 @@ Résultat :
 
 ---
 
-## 5. Commandes utiles
+## 6. Commandes utiles
 
 ```bash
 # Forcer un sync manuel
@@ -155,9 +221,9 @@ argocd app rollback chat-auth <revision-id>
 
 ---
 
-## 6. Difficultés rencontrées et solutions
+## 7. Difficultés rencontrées et solutions
 
-### 6.1 Certificat SSL sur localhost
+### 7.1 Certificat SSL sur localhost
 
 **Problème :** Le navigateur affiche un avertissement de certificat pour https://localhost:8090.
 
@@ -165,13 +231,21 @@ argocd app rollback chat-auth <revision-id>
 
 **Solution :** Accepter l'exception de sécurité dans le navigateur (Avancé → Continuer). En production, configurer un certificat valide.
 
-### 6.2 Applications créées via UI
+### 7.2 Mot de passe admin oublié
+
+**Solution :**
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```
+Username : `admin`
+
+### 7.3 Applications créées via UI
 
 **Note :** Les Applications ont été créées via l'UI Argo CD. Pour une approche GitOps complète, on peut ajouter des manifests dans `k8s/base/argocd/` et les appliquer avec `kubectl apply`, afin que la définition des Applications soit versionnée dans Git.
 
 ---
 
-## 7. Synthèse
+## 8. Synthèse
 
 | Élément | Détail |
 |---------|--------|
@@ -183,7 +257,7 @@ argocd app rollback chat-auth <revision-id>
 
 ---
 
-## 8. Critères de validation (Phase 9)
+## 9. Critères de validation (Phase 9)
 
 | Critère | Statut |
 |---------|--------|

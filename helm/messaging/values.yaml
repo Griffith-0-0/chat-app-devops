@@ -14,6 +14,7 @@ env:
   REDIS_URL: "redis://redis:6379"
   RABBITMQ_URL: "amqp://user:password@rabbitmq:5672"
   AUTH_SERVICE_URL: "http://auth:3001"
+  SENTRY_DSN: "https://d3ce1b2a08691477cd1ff1dec265f4cf@o4511023079882752.ingest.de.sentry.io/4511023094693968"
 
 resources:
   requests:
