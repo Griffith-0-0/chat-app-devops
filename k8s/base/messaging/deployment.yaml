@@ -15,10 +15,24 @@ spec:
       labels:
         app: messaging
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+        - name: dockerhub-credentials
       containers:
         - name: messaging
           image: badrkhafif98/chat-messaging:latest
           imagePullPolicy: Never
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           ports:
             - containerPort: 3003
           envFrom:
@@ -36,3 +50,6 @@ spec:
               port: 3003
             initialDelaySeconds: 30
             periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir: {}

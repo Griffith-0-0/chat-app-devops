@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: chat-app-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: chat-app.availability
+      interval: 30s
+      rules:
+        - alert: PodDown
+          expr: sum by (namespace, pod) (kube_pod_status_ready{namespace="chat-app", condition="false"}) > 0
+          for: 30s
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} est down"
+            description: "Le pod {{ $labels.pod }} est NotReady."
+
+        - alert: AuthServiceMissing
+          expr: absent(up{namespace="chat-app", job="auth"})
+          for: 30s
+          labels:
+            severity: critical
+          annotations:
+            summary: "Auth indisponible"
+            description: "Aucune target Prometheus active pour auth depuis 30s."

@@ -15,10 +15,24 @@ spec:
       labels:
         app: auth
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+        - name: dockerhub-credentials
       containers:
         - name: auth
           image: badrkhafif98/chat-auth:latest
           imagePullPolicy: Never
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           ports:
             - containerPort: 3001
           envFrom:
@@ -38,3 +52,6 @@ spec:
               port: 3001
             initialDelaySeconds: 30
             periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir: {}

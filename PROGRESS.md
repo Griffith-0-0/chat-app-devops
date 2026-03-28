@@ -1,7 +1,7 @@
 # Progression TP DevOps — Chat App
 
 ## Statut global
-🟢 Phase 9 terminée — Argo CD GitOps opérationnel
+🟢 Phase 11 terminée — Alerting (Prometheus, AlertManager, notifications Discord)
 
 ---
 
@@ -18,8 +18,8 @@
 | Phase 7 | Kubernetes Minikube | ✅ |
 | Phase 8 | Helm charts | ✅ |
 | Phase 9 | Argo CD GitOps | ✅ |
-| Phase 10 | Monitoring Prometheus + Grafana + Loki | 🟡 En cours |
-| Phase 11 | Alerting AlertManager | 🔴 |
+| Phase 10 | Monitoring Prometheus + Grafana + Loki + Sentry | ✅ |
+| Phase 11 | Alerting AlertManager + Discord | ✅ |
 | Phase 12 | Sécurité | 🔴 |
 
 ---
@@ -104,6 +104,26 @@ Applications chat-auth, chat-profiles, chat-messaging, chat-front    ✅
 Sync auto + selfHeal validés (modif Git, kubectl scale)              ✅
 Rapport détaillé → repport/phase9.md                                 ✅
 
+Phase 10 terminée ✅------------------------------------------------
+Prometheus + Grafana (kube-prometheus-stack)                        ✅
+Métriques custom (auth, profiles, messaging) + ServiceMonitors       ✅
+Loki + Promtail (loki-stack-values.yaml, Loki 2.9.3)                ✅
+Logs visibles dans Grafana (LogQL)                                  ✅
+Sentry backend (auth, profiles, messaging) — DSN dans Secret/ConfigMap  ✅
+Sentry front React (instrument.js, tracing, session replay)         ✅
+Erreurs visibles dans Sentry (auth /debug-sentry, front ErrorButton) ✅
+Rapport détaillé → repport/phase10.md                               ✅
+
+Phase 11 terminée ✅------------------------------------------------
+Règles Prometheus (`k8s/base/monitoring/alert-rules.yaml`) : PodDown, AuthServiceMissing  ✅
+Secret K8s `alertmanager-discord-webhook` (URL webhook hors Git)                        ✅
+AlertmanagerConfig (`k8s/base/monitoring/alertmanager-config.yaml`) : critical → Discord  ✅
+`monitoring-values.yaml` : `alertmanagerConfigMatcherStrategy: None` (routing multi-namespace)  ✅
+Helm upgrade kube-prometheus-stack avec values Alertmanager                               ✅
+Test cycle UP/DOWN `auth` : FIRING → Discord → RESOLVED                                  ✅
+Port-forward Prometheus (9090) + Alertmanager (9093) validés                             ✅
+Rapport détaillé → repport/phase11.md                                                    ✅
+
 Points bloquants et solutions (Phase 6) :
 | Problème | Solution |
 |----------|----------|
@@ -116,7 +136,7 @@ Points bloquants et solutions (Phase 6) :
 
 
 ## 🔄 En cours
-Phase 10 — Monitoring : Prometheus + Grafana installés, métriques auth intégrées. Reste : profiles, messaging, ServiceMonitor, Loki, Sentry, dashboards. Rapport → repport/phase10.md
+Phase 12 — Sécurité
 
 ## ❌ Bloqué
 <!-- Décrire les blocages avec ce qui a déjà été essayé -->

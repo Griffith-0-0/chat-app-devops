@@ -43,7 +43,25 @@ Prometheus scrape via ServiceMonitor
         ↓
 Grafana affiche les dashboards
 
-Pods → stdout/stderr → Promtail → Loki → Grafana (LogQL)
+services/auth/src/index.js
+    console.log("User connected")
+    console.error("JWT invalid")
+            │
+            │ Kubernetes capture stdout/stderr
+            ▼
+    /var/log/pods/chat-app_auth-xxx/auth/0.log
+            │
+            │ Promtail surveille ce fichier
+            ▼
+    Promtail ajoute labels {app="auth", namespace="chat-app"}
+            │
+            │ HTTP POST vers Loki
+            ▼
+    Loki stocke les logs indexés par labels
+            │
+            │ Requête LogQL depuis Grafana
+            ▼
+    Grafana affiche les logs dans l'interface
 ```
 
 ---

@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: chat-app-alertmanager
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  route:
+    receiver: default-null
+    groupBy: ["alertname", "namespace", "severity"]
+    groupWait: 10s
+    groupInterval: 1m
+    repeatInterval: 1h
+    routes:
+      - matchers:
+          - name: severity
+            matchType: "="
+            value: critical
+        receiver: discord-critical
+  receivers:
+    - name: default-null
+    - name: discord-critical
+      discordConfigs:
+        - apiURL:
+            name: alertmanager-discord-webhook
+            key: webhook-url
+          title: "🚨 CRITIQUE: {{ .GroupLabels.alertname }}"
+          message: "{{ range .Alerts }}{{ .Annotations.description }}{{ end }}"
