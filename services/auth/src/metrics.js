@@ -25,6 +25,24 @@ const registersTotal = new promClient.Counter({
   help: 'Total number of successful registrations'
 });
 
+// Inscriptions échouées (validation BDD, contrainte unique, etc.)
+const failedRegistersTotal = new promClient.Counter({
+  name: 'auth_failed_registers_total',
+  help: 'Total number of failed registration attempts'
+});
+
+// Déconnexions
+const logoutsTotal = new promClient.Counter({
+  name: 'auth_logouts_total',
+  help: 'Total number of logouts'
+});
+
+// Refresh tokens émis
+const refreshTokensTotal = new promClient.Counter({
+  name: 'auth_refresh_tokens_total',
+  help: 'Total number of refresh token exchanges'
+});
+
 async function getMetrics() {
   return promClient.register.metrics();
 }
@@ -37,6 +55,9 @@ module.exports = {
   loginsTotal,
   failedLoginsTotal,
   registersTotal,
+  failedRegistersTotal,
+  logoutsTotal,
+  refreshTokensTotal,
   getMetrics,
   getContentType
 };

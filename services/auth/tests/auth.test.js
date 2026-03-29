@@ -1,11 +1,57 @@
 /**
  * Tests d'intégration du service Auth
- * Vérifie register, login, health check. Utilise Supertest pour simuler les requêtes HTTP.
+ * Vérifie register, login, health check. Supertest + app Express.
+ * DB et Redis sont mockés pour CI/Jenkins sans Postgres/Redis réels.
  */
+jest.mock('../src/redis', () => ({
+  get: jest.fn().mockResolvedValue(null),
+  set: jest.fn().mockResolvedValue('OK'),
+  connect: jest.fn().mockResolvedValue(undefined),
+  on: jest.fn(),
+}));
+
+jest.mock('../src/db', () => ({
+  query: jest.fn(),
+  on: jest.fn(),
+}));
+
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_jwt_secret_for_jest_must_be_long_enough!!';
+process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test_jwt_refresh_for_jest_must_be_long!!';
+
 const request = require('supertest');
+const db = require('../src/db');
 const app = require('../src/app');
 
+/** Stockage en mémoire pour simuler users (email → ligne complète avec password_hash) */
+const usersByEmail = new Map();
+
+function dbQueryImpl(sql, params) {
+  if (sql.includes('INSERT INTO users')) {
+    const [username, email, passwordHash] = params;
+    if (usersByEmail.has(email)) {
+      const err = new Error('duplicate key value violates unique constraint');
+      err.code = '23505';
+      return Promise.reject(err);
+    }
+    const id = String(usersByEmail.size + 1);
+    const row = { id, username, email };
+    usersByEmail.set(email, { id, username, email, password_hash: passwordHash });
+    return Promise.resolve({ rows: [row] });
+  }
+  if (sql.includes('SELECT * FROM users')) {
+    const email = params[0];
+    const u = usersByEmail.get(email);
+    return Promise.resolve({ rows: u ? [u] : [] });
+  }
+  return Promise.resolve({ rows: [] });
+}
+
 describe('Auth Service', () => {
+  beforeEach(() => {
+    usersByEmail.clear();
+    db.query.mockImplementation(dbQueryImpl);
+  });
+
   describe('POST /auth/register', () => {
     it('should register a new user', async () => {
       const res = await request(app)
