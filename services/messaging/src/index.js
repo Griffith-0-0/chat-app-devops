@@ -2,6 +2,7 @@
  * Point d'entrée du service Messaging
  * Combine Express (API REST) et Socket.io (temps réel). Gère les messages de chat par room.
  * Auth via service Auth, stockage PostgreSQL, événements publiés sur RabbitMQ.
+ * (Changement mineur pour inclure ce service dans le pipeline Jenkins sur le prochain push.)
  */
 require("./instrument.js");
 

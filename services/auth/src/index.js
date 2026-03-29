@@ -2,6 +2,7 @@
  * Point d'entrée du service Auth
  * Démarre le serveur Express sur le port configuré (3001 par défaut).
  * Ce service gère l'authentification : inscription, connexion, déconnexion, refresh token.
+ * (Changement mineur pour inclure ce service dans le pipeline Jenkins sur le prochain push.)
  */
 require("./instrument.js");
 
