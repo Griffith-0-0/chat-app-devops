@@ -28,7 +28,7 @@ app.get('/metrics', async (req, res) => {
 app.use('/auth', authRoutes);
 
 // Route de test Sentry (à retirer en production)
-app.get('/debug-sentry', function mainHandler(req, res) {
+app.get('/debug-sentry', function mainHandler(_req, _res) {
   throw new Error('My first Sentry error!');
 });
 
