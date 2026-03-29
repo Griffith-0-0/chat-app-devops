@@ -24,7 +24,7 @@ spec:
       containers:
         - name: auth
           image: badrkhafif98/chat-auth:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

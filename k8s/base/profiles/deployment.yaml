@@ -24,7 +24,7 @@ spec:
       containers:
         - name: profiles
           image: badrkhafif98/chat-profiles:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

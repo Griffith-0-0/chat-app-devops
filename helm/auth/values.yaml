@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: badrkhafif98/chat-auth
   tag: latest
-  pullPolicy: Never
+  pullPolicy: IfNotPresent
 
 service:
   port: 3001

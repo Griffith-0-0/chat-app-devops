@@ -20,7 +20,7 @@ spec:
       containers:
         - name: front
           image: badrkhafif98/chat-front:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
           ports:

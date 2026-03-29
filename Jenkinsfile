@@ -180,18 +180,26 @@ pipeline {
                 )]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                     script {
-                        if (env.BUILD_AUTH == 'true') {
-                            sh "docker push ${env.DOCKER_HUB_USER}/chat-auth:${env.BUILD_NUMBER}"
-                        }
-                        if (env.BUILD_PROFILES == 'true') {
-                            sh "docker push ${env.DOCKER_HUB_USER}/chat-profiles:${env.BUILD_NUMBER}"
-                        }
-                        if (env.BUILD_MESSAGING == 'true') {
-                            sh "docker push ${env.DOCKER_HUB_USER}/chat-messaging:${env.BUILD_NUMBER}"
-                        }
-                        if (env.BUILD_FRONT == 'true') {
-                            sh "docker push ${env.DOCKER_HUB_USER}/chat-front:${env.BUILD_NUMBER}"
-                        }
+                    if (env.BUILD_AUTH == 'true') {
+                        sh "docker tag ${env.DOCKER_HUB_USER}/chat-auth:${env.BUILD_NUMBER} ${env.DOCKER_HUB_USER}/chat-auth:latest"
+                        sh "docker push ${env.DOCKER_HUB_USER}/chat-auth:${env.BUILD_NUMBER}"
+                        sh "docker push ${env.DOCKER_HUB_USER}/chat-auth:latest"
+                    }
+                    if (env.BUILD_PROFILES == 'true') {
+                        sh "docker tag ${env.DOCKER_HUB_USER}/chat-profiles:${env.BUILD_NUMBER} ${env.DOCKER_HUB_USER}/chat-profiles:latest"
+                        sh "docker push ${env.DOCKER_HUB_USER}/chat-profiles:${env.BUILD_NUMBER}"
+                        sh "docker push ${env.DOCKER_HUB_USER}/chat-profiles:latest"
+                    }
+                    if (env.BUILD_MESSAGING == 'true') {
+                        sh "docker tag ${env.DOCKER_HUB_USER}/chat-messaging:${env.BUILD_NUMBER} ${env.DOCKER_HUB_USER}/chat-messaging:latest"
+                        sh "docker push ${env.DOCKER_HUB_USER}/chat-messaging:${env.BUILD_NUMBER}"
+                        sh "docker push ${env.DOCKER_HUB_USER}/chat-messaging:latest"
+                    }
+                    if (env.BUILD_FRONT == 'true') {
+                        sh "docker tag ${env.DOCKER_HUB_USER}/chat-front:${env.BUILD_NUMBER} ${env.DOCKER_HUB_USER}/chat-front:latest"
+                        sh "docker push ${env.DOCKER_HUB_USER}/chat-front:${env.BUILD_NUMBER}"
+                        sh "docker push ${env.DOCKER_HUB_USER}/chat-front:latest"
+                    }
                     }
                 }
             }

@@ -24,7 +24,7 @@ spec:
       containers:
         - name: messaging
           image: badrkhafif98/chat-messaging:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
