@@ -4,7 +4,7 @@
  */
 import { useState, useEffect } from 'react';
 import { profilesAPI } from '../api/axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
@@ -25,7 +25,7 @@ export default function Profile() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [user, token]);
+  }, [user, token, navigate]);
 
   const handleSave = async () => {
     await profilesAPI.put(`/profiles/${user.userId}`, {

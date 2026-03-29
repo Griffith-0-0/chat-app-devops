@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { messagesAPI } from '../api/axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 export default function Chat() {
@@ -13,7 +13,7 @@ export default function Chat() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [content, setContent] = useState('');
-  const [roomId, setRoomId] = useState('room-general');
+  const [roomId] = useState('room-general');
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -33,7 +33,7 @@ export default function Chat() {
     });
 
     return () => socketRef.current.disconnect();
-  }, [token, roomId]);
+  }, [token, roomId, navigate]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

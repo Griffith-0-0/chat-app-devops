@@ -1,11 +1,11 @@
 /**
  * Contexte d'authentification global
  * Expose user, token, login, register, logout. Persiste les tokens dans localStorage.
+ * useAuth est dans ../hooks/useAuth.js (react-refresh/only-export-components).
  */
-import { createContext, useContext, useState } from 'react';
+import { useState } from 'react';
 import { authAPI } from '../api/axios';
-
-const AuthContext = createContext();
+import { AuthContext } from './auth-context';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -38,5 +38,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => useContext(AuthContext);
