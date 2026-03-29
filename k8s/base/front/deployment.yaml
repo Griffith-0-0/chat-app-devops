@@ -15,12 +15,10 @@ spec:
       labels:
         app: front
     spec:
-      imagePullSecrets:
-        - name: dockerhub-credentials
       containers:
         - name: front
           image: badrkhafif98/chat-front:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           securityContext:
             allowPrivilegeEscalation: false
           ports:

@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: badrkhafif98/chat-messaging
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Never
 
 service:
   port: 3003

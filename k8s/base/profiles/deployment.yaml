@@ -19,12 +19,10 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
-      imagePullSecrets:
-        - name: dockerhub-credentials
       containers:
         - name: profiles
           image: badrkhafif98/chat-profiles:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
