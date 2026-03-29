@@ -1,17 +1,52 @@
 /**
  * Tests d'intégration du service Profiles
- * Vérifie GET/PUT profils, auth, 403/401. Mock axios pour simuler le service Auth.
+ * Vérifie GET/PUT profils, auth, 403/401. Mock axios (Auth) + mock pg (pas de Postgres en CI).
  */
-const request = require('supertest');
-const axios = require('axios');
-const app = require('../src/app');
+jest.mock('../src/db', () => ({
+  query: jest.fn(),
+  on: jest.fn(),
+}));
 
 jest.mock('axios');
+
+const request = require('supertest');
+const axios = require('axios');
+const db = require('../src/db');
+const app = require('../src/app');
+
+/** Store en mémoire pour simuler la table profiles */
+const profilesByUserId = new Map();
+
+function profilesQueryImpl(sql, params) {
+  if (sql.includes('INSERT INTO profiles')) {
+    const [userId, display_name, avatar_url, status] = params;
+    const row = {
+      user_id: userId,
+      display_name,
+      avatar_url,
+      status,
+      updated_at: new Date().toISOString(),
+    };
+    profilesByUserId.set(userId, row);
+    return Promise.resolve({ rows: [row] });
+  }
+  if (sql.includes('WHERE user_id = $1') || sql.includes('WHERE user_id =')) {
+    const userId = params[0];
+    const row = profilesByUserId.get(userId);
+    return Promise.resolve({ rows: row ? [row] : [] });
+  }
+  if (sql.includes('FROM profiles') && !sql.includes('WHERE')) {
+    return Promise.resolve({ rows: Array.from(profilesByUserId.values()) });
+  }
+  return Promise.resolve({ rows: [] });
+}
 
 describe('Profiles Service', () => {
   const mockUserId = 'ca453145-bc8c-48c6-891e-e4c5ef7da610';
 
   beforeEach(() => {
+    profilesByUserId.clear();
+    db.query.mockImplementation(profilesQueryImpl);
     axios.get.mockResolvedValue({ data: { userId: mockUserId } });
   });
 

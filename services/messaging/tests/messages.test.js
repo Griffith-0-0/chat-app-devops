@@ -1,17 +1,37 @@
 /**
  * Tests d'intégration du service Messaging
- * Vérifie GET /messages/:roomId, auth, 401. Mock axios pour le service Auth.
+ * Vérifie GET /messages/:roomId, auth, 401. Mock axios (Auth) + mock pg (pas de Postgres en CI).
  */
-const request = require('supertest');
-const axios = require('axios');
-const app = require('../src/app');
+jest.mock('../src/db', () => ({
+  query: jest.fn(),
+  on: jest.fn(),
+}));
 
 jest.mock('axios');
+
+const request = require('supertest');
+const axios = require('axios');
+const db = require('../src/db');
+const app = require('../src/app');
+
+/** room_id -> messages[] (forme colonnes SELECT *) */
+const messagesByRoomId = new Map();
+
+function messagesQueryImpl(sql, params) {
+  if (sql.includes('FROM messages') && sql.includes('room_id')) {
+    const roomId = params[0];
+    const rows = messagesByRoomId.get(roomId) || [];
+    return Promise.resolve({ rows });
+  }
+  return Promise.resolve({ rows: [] });
+}
 
 describe('Messaging Service', () => {
   const mockUserId = 'ca453145-bc8c-48c6-891e-e4c5ef7da610';
 
   beforeEach(() => {
+    messagesByRoomId.clear();
+    db.query.mockImplementation(messagesQueryImpl);
     axios.get.mockResolvedValue({ data: { userId: mockUserId } });
   });
 
@@ -25,8 +45,18 @@ describe('Messaging Service', () => {
     });
 
     it('should return messages with expected shape when room has messages', async () => {
+      const roomId = 'any-room-id';
+      messagesByRoomId.set(roomId, [
+        {
+          id: '1',
+          room_id: roomId,
+          sender_id: mockUserId,
+          content: 'hello',
+          created_at: new Date().toISOString(),
+        },
+      ]);
       const res = await request(app)
-        .get('/messages/any-room-id')
+        .get(`/messages/${roomId}`)
         .set('Authorization', 'Bearer fake-token');
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
