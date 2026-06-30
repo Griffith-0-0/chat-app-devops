@@ -1,0 +1,38 @@
+# Kustomize root — permet: kubectl apply -k k8s/base/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - postgres/service.yaml
+  - postgres/statefulset.yaml
+  - redis/service.yaml
+  - redis/deployment.yaml
+  - rabbitmq/service.yaml
+  - rabbitmq/deployment.yaml
+  - app-secrets.yaml
+  - auth/secret.yaml
+  - auth/configmap.yaml
+  - auth/service.yaml
+  - auth/deployment.yaml
+  - profiles/configmap.yaml
+  - profiles/service.yaml
+  - profiles/deployment.yaml
+  - messaging/configmap.yaml
+  - messaging/service.yaml
+  - messaging/deployment.yaml
+  - front/service.yaml
+  - front/deployment.yaml
+  - nginx/configmap.yaml
+  - nginx/service.yaml
+  - nginx/deployment.yaml
+  - ingress.yaml
+  - monitoring/alert-rules.yaml
+  - monitoring/alertmanager-config.yaml
+  - monitoring/trivy-cronjob.yaml
+  - rbac/jenkins-rbac.yaml
+  - network-policies/default-deny.yaml
+  - network-policies/allow-egress-dns.yaml
+  - network-policies/allow-egress-within-namespace.yaml
+  - network-policies/allow-ingress-to-services.yaml
+  - network-policies/allow-services-to-db.yaml

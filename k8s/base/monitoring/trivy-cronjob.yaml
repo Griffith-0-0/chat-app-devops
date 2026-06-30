@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: trivy-nightly-scan
+  namespace: chat-app
+spec:
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: trivy
+              image: aquasec/trivy:latest
+              command:
+                - /bin/sh
+                - -c
+              args:
+                - |
+                  set -eu
+                  for image in \
+                    badrkhafif98/chat-auth:latest \
+                    badrkhafif98/chat-profiles:latest \
+                    badrkhafif98/chat-messaging:latest \
+                    badrkhafif98/chat-front:latest; do
+                    trivy image --severity=HIGH,CRITICAL --exit-code=0 "$image"
+                  done

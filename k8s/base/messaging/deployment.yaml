@@ -36,6 +36,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: messaging-config
+            - secretRef:
+                name: app-secrets
           readinessProbe:
             httpGet:
               path: /health

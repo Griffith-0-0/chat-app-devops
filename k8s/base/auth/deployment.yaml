@@ -37,6 +37,8 @@ spec:
             - configMapRef:
                 name: auth-config
             - secretRef:
+                name: app-secrets
+            - secretRef:
                 name: auth-secrets
           readinessProbe:
             httpGet:

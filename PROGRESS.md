@@ -1,7 +1,7 @@
 # Progression TP DevOps — Chat App
 
 ## Statut global
-🟢 Phase 11 terminée — Alerting (Prometheus, AlertManager, notifications Discord)
+🟢 Phase 12 terminée — Sécurité Kubernetes (secrets, Network Policies, securityContext, Trivy, RBAC)
 
 ---
 
@@ -20,7 +20,8 @@
 | Phase 9 | Argo CD GitOps | ✅ |
 | Phase 10 | Monitoring Prometheus + Grafana + Loki + Sentry | ✅ |
 | Phase 11 | Alerting AlertManager + Discord | ✅ |
-| Phase 12 | Sécurité | 🔴 |
+| Phase 12 | Sécurité | ✅ |
+| Phase 13 | Multi-environnements dev / staging / prod | 🔴 |
 
 ---
 
@@ -124,6 +125,18 @@ Test cycle UP/DOWN `auth` : FIRING → Discord → RESOLVED                     
 Port-forward Prometheus (9090) + Alertmanager (9093) validés                             ✅
 Rapport détaillé → repport/phase11.md                                                    ✅
 
+Phase 12 terminée ✅------------------------------------------------
+Audit des secrets (`.env` ignorés, aucun `.env` suivi par Git)                           ✅
+Secrets sensibles retirés des ConfigMaps et gérés via objets `Secret` K8s                ✅
+Network Policies (`default-deny`, DNS, intra-namespace, services → DB)                   ✅
+SecurityContext durci sur auth, profiles, messaging                                      ✅
+Compromis documenté pour les images Nginx (`front`, `nginx`)                             ✅
+Trivy dans Jenkins : blocage des vulnérabilités CRITICAL avant push                      ✅
+CronJob Trivy planifié (`k8s/base/monitoring/trivy-cronjob.yaml`)                        ✅
+RBAC Jenkins minimal (`k8s/base/rbac/jenkins-rbac.yaml`)                                 ✅
+Kustomization mise à jour pour appliquer sécurité + monitoring                           ✅
+Rapport détaillé → repport/phase12.md                                                    ✅
+
 Points bloquants et solutions (Phase 6) :
 | Problème | Solution |
 |----------|----------|
@@ -136,7 +149,7 @@ Points bloquants et solutions (Phase 6) :
 
 
 ## 🔄 En cours
-Phase 12 — Sécurité
+Phase 13 — Multi-environnements dev / staging / prod
 
 ## ❌ Bloqué
 <!-- Décrire les blocages avec ce qui a déjà été essayé -->

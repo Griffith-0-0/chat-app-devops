@@ -1,4 +1,4 @@
-# Phase 12 — Sécurité (état au 27 mars 2026)
+# Phase 12 — Sécurité (terminée le 6 juin 2026)
 
 ## Définitions rapides
 
@@ -16,7 +16,8 @@ Renforcer la posture sécurité du déploiement Chat App sur Kubernetes :
 - audit des secrets et bonnes pratiques de stockage ;
 - isolation réseau entre pods (principe du moindre privilège) ;
 - durcissement des conteneurs applicatifs (`securityContext`) ;
-- (à finaliser selon le sujet) scan Trivy planifié et RBAC Jenkins.
+- scan des images avec Trivy dans Jenkins et scan planifié Kubernetes ;
+- RBAC minimal pour Jenkins.
 
 ---
 
@@ -46,6 +47,7 @@ minikube addons enable ingress
 | Point | Résultat |
 |-------|----------|
 | Secrets dans un objet `Secret` K8s (ex. `auth-secrets`) | Oui |
+| Credentials BDD/RabbitMQ retirés des `ConfigMap` | Oui, centralisés dans `app-secrets` |
 | Valeurs encodées en base64 dans le manifeste | Oui |
 | Contenu JWT initialement de type *placeholder* (`change_this_secret_in_production`) | Identifié ; rotation possible via `kubectl create secret ... --dry-run=client \| kubectl apply -f -` |
 | Historique Git des fichiers `.env` | `git log --all --full-history -- "**/.env" "*.env"` — pas de fuite attendue dans l’historique |
@@ -69,7 +71,7 @@ openssl rand -base64 32
 
 ### 4.2 Mesures mises en place
 
-1. **`imagePullSecrets`** : secret `docker-registry` `dockerhub-credentials` dans `chat-app` (à renouveler si le token Docker Hub est exposé — **révoquer le token sur hub.docker.com** s’il a été partagé dans un chat ou un dépôt).
+1. **Registry privée / credentials** : si les images Docker Hub sont privées, créer côté cluster un secret `docker-registry` `dockerhub-credentials` dans `chat-app` (non versionné, car il contient des credentials).
 2. **Build local dans le daemon Minikube** pour le développement :
 
    ```bash
@@ -173,16 +175,68 @@ Tentative initiale avec `readOnlyFileSystem` + `capabilities.drop: ["ALL"]` → 
 | `k8s/base/network-policies/allow-services-to-db.yaml` | Créé |
 | `k8s/base/network-policies/allow-egress-dns.yaml` | Créé |
 | `k8s/base/network-policies/allow-egress-within-namespace.yaml` | Créé |
-| `k8s/base/auth/deployment.yaml` | Modifié (`securityContext`, `imagePullPolicy`, `imagePullSecrets`, volume `/tmp`) |
+| `k8s/base/app-secrets.yaml` | Créé : `DATABASE_URL`, `POSTGRES_PASSWORD`, `RABBITMQ_URL`, `RABBITMQ_DEFAULT_PASS` |
+| `k8s/base/auth/configmap.yaml` | Nettoyé : retrait de `DATABASE_URL` sensible |
+| `k8s/base/profiles/configmap.yaml` | Nettoyé : retrait de `DATABASE_URL` sensible |
+| `k8s/base/messaging/configmap.yaml` | Nettoyé : retrait de `DATABASE_URL` et `RABBITMQ_URL` sensibles |
+| `k8s/base/auth/deployment.yaml` | Modifié (`securityContext`, `imagePullPolicy`, volume `/tmp`) |
 | `k8s/base/profiles/deployment.yaml` | Idem |
 | `k8s/base/messaging/deployment.yaml` | Idem |
-| `k8s/base/front/deployment.yaml` | Modifié (`securityContext`, `imagePullSecrets`, `imagePullPolicy`) |
+| `k8s/base/postgres/statefulset.yaml` | Modifié : `POSTGRES_PASSWORD` lu depuis `app-secrets` |
+| `k8s/base/rabbitmq/deployment.yaml` | Modifié : `RABBITMQ_DEFAULT_PASS` lu depuis `app-secrets` |
+| `k8s/base/front/deployment.yaml` | Modifié (`securityContext`, `imagePullPolicy`) |
 | `k8s/base/nginx/deployment.yaml` | Modifié (`securityContext`) |
-| Secret K8s `dockerhub-credentials` (namespace `chat-app`) | Créé côté cluster (non versionné — contient des credentials) |
+| `k8s/base/monitoring/trivy-cronjob.yaml` | Créé : scan planifié HIGH/CRITICAL des images applicatives |
+| `k8s/base/rbac/jenkins-rbac.yaml` | Créé : ServiceAccount, Role et RoleBinding Jenkins avec permissions limitées |
+| `k8s/base/kustomization.yaml` | Mis à jour pour appliquer Network Policies, RBAC et CronJob Trivy |
 
-Let me fix the typo in the report file.
-</think>
+---
 
+## 9) Trivy — scan continu des images
 
-<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
-StrReplace
+Deux niveaux de scan sont en place :
+
+| Niveau | Implémentation | Comportement |
+|--------|----------------|--------------|
+| Pipeline Jenkins | `Jenkinsfile`, stage `Trivy Security Scan` | Bloque le pipeline si une vulnérabilité `CRITICAL` est détectée avant le push |
+| Kubernetes planifié | `k8s/base/monitoring/trivy-cronjob.yaml` | Lance un scan nocturne des images `auth`, `profiles`, `messaging` et `front` |
+
+Le CronJob utilise `--exit-code=0` pour produire un résultat d'audit régulier sans casser le cluster. Le blocage reste volontairement porté par Jenkins, avant publication et déploiement.
+
+---
+
+## 10) RBAC Jenkins
+
+Le fichier `k8s/base/rbac/jenkins-rbac.yaml` crée :
+
+- un `ServiceAccount` `jenkins` dans le namespace `chat-app` ;
+- un `Role` limité à la lecture des objets utiles et à la mise à jour/patch des `deployments` ;
+- un `RoleBinding` qui associe Jenkins à ce rôle.
+
+Cette configuration applique le principe du moindre privilège : Jenkins peut déployer/mettre à jour les workloads applicatifs sans recevoir de droits administrateur sur tout le cluster.
+
+---
+
+## 11) Critères de validation Phase 12
+
+| Critère | Statut |
+|---------|--------|
+| Aucun `.env` suivi par Git et `.env` ignoré dans `.gitignore` | ✅ |
+| Secrets sensibles placés dans des objets `Secret` K8s ou credentials externes | ✅ |
+| Aucun credential applicatif dans les `ConfigMap` | ✅ |
+| Network Policies appliquées dans `k8s/base/network-policies/` | ✅ |
+| Default deny ingress/egress + règles DNS et intra-namespace documentées | ✅ |
+| Le front ne peut pas parler directement à PostgreSQL | ✅ |
+| `securityContext` durci sur `auth`, `profiles`, `messaging` | ✅ |
+| Compromis documenté pour les images Nginx (`front`, `nginx`) | ✅ |
+| Trivy bloque les vulnérabilités critiques dans Jenkins | ✅ |
+| CronJob Trivy planifié ajouté au socle K8s | ✅ |
+| RBAC Jenkins ajouté avec permissions limitées | ✅ |
+
+---
+
+## 12) Conclusion
+
+La Phase 12 est terminée côté repository : secrets, isolation réseau, durcissement des conteneurs, scan de vulnérabilités et RBAC Jenkins sont documentés et versionnés.
+
+La suite logique est la **Phase 13 — Multi-environnements (dev / staging / prod)**.
