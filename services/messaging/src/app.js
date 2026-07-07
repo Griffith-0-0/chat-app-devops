@@ -9,11 +9,12 @@ const messageRoutes = require('./routes/messages');
 const metrics = require('./metrics');
 require('dotenv').config();
 
+const SERVICE_NAME = 'messaging';
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', service: SERVICE_NAME }));
 
 // Métriques Prometheus
 app.get('/metrics', async (req, res) => {

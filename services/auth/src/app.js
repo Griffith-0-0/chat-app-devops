@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const metrics = require('./metrics');
 require('dotenv').config();
 
+const SERVICE_NAME = 'auth';
 const app = express();
 // CORS : autorise les requêtes cross-origin (front, autres services)
 app.use(cors());
@@ -16,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // Health check : utilisé par K8s (readiness/liveness probes) et load balancers
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', service: SERVICE_NAME }));
 
 // Métriques Prometheus 
 app.get('/metrics', async (req, res) => {

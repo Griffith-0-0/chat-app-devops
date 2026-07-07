@@ -15,6 +15,8 @@ import Register from './pages/Register';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 
+document.title = 'CoWork App';
+
 createRoot(document.getElementById('root'), {
   onUncaughtError: reactErrorHandler(),
   onCaughtError: reactErrorHandler(),
