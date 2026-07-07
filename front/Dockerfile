@@ -27,6 +27,7 @@ RUN npm run build
 FROM nginx:alpine
 # libexpat CVE-2026-32767 (CRITICAL): fixed in 2.7.5-r0 — refresh index until base image includes it
 RUN apk update && apk upgrade --no-cache libexpat
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

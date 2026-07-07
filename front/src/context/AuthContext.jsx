@@ -7,17 +7,27 @@ import { useState } from 'react';
 import { authAPI } from '../api/axios';
 import { AuthContext } from './auth-context';
 
+function getUserFromToken(token) {
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return { userId: payload.userId };
+  } catch {
+    return null;
+  }
+}
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('accessToken'));
+  const storedToken = localStorage.getItem('accessToken');
+  const [user, setUser] = useState(() => getUserFromToken(storedToken));
+  const [token, setToken] = useState(storedToken);
 
   const login = async (email, password) => {
     const res = await authAPI.post('/auth/login', { email, password });
     localStorage.setItem('accessToken', res.data.accessToken);
     localStorage.setItem('refreshToken', res.data.refreshToken);
     setToken(res.data.accessToken);
-    const payload = JSON.parse(atob(res.data.accessToken.split('.')[1]));
-    setUser({ userId: payload.userId });
+    setUser(getUserFromToken(res.data.accessToken));
   };
 
   const register = async (username, email, password) => {
@@ -25,11 +35,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await authAPI.post('/auth/logout');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setToken(null);
-    setUser(null);
+    try {
+      await authAPI.post('/auth/logout');
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      setToken(null);
+      setUser(null);
+    }
   };
 
   return (

@@ -1,5 +1,5 @@
 /**
- * Point d'entrée de l'application React Chat App
+ * Point d'entrée de l'application React CoWork App
  * Configure le routage (login, register, chat, profile) et le contexte d'authentification.
  */
 import "./instrument";
