@@ -415,6 +415,53 @@ Credentials attendus dans Jenkins :
 | `SONAR_TOKEN` | Analyse SonarCloud |
 | `dockerhub-credentials` | Push des images Docker |
 
+### Flux Jenkins CI/CD
+
+Ce diagramme montre comment Jenkins transforme un push GitHub en image Docker valide, puis en mise a jour deployable par Argo CD.
+
+```mermaid
+flowchart TD
+    A["Developer push sur GitHub"] --> B["Webhook / Poll SCM"]
+    B --> C["Jenkins Pipeline demarre"]
+
+    C --> D["Checkout du repository"]
+    D --> E["Detection des services modifies"]
+
+    E --> F["Install dependencies"]
+    F --> G["Lint ESLint"]
+    G --> H["Tests Jest / Supertest"]
+    H --> I["Coverage reports"]
+
+    I --> J["SonarCloud Analysis"]
+    J --> K{"Quality Gate OK ?"}
+
+    K -- "Non" --> X["Pipeline echoue"]
+    K -- "Oui" --> L["Docker Build"]
+
+    L --> M["Build auth image"]
+    L --> N["Build profiles image"]
+    L --> O["Build messaging image"]
+    L --> P["Build front image"]
+
+    M --> Q["Trivy Scan"]
+    N --> Q
+    O --> Q
+    P --> Q
+
+    Q --> R{"Vulnerabilites critiques ?"}
+
+    R -- "Oui" --> X
+    R -- "Non" --> S["Docker Push vers Docker Hub"]
+
+    S --> T["Update Helm values.yaml"]
+    T --> U["Commit + Push des nouveaux tags"]
+    U --> V["Argo CD detecte le changement"]
+    V --> W["Deploiement Kubernetes"]
+
+    W --> Y["Pods mis a jour dans Minikube"]
+    Y --> Z["Monitoring Prometheus / Grafana"]
+```
+
 ## GitOps avec Argo CD
 
 Argo CD surveille le repo Git et synchronise les charts Helm vers Kubernetes.

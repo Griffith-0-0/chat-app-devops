@@ -128,9 +128,9 @@ pipeline {
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     sh '''
                         npm install -g sonar-scanner
-                        (cd services/auth && sonar-scanner)
-                        (cd services/profiles && sonar-scanner)
-                        (cd services/messaging && sonar-scanner)
+                        (cd services/auth && sonar-scanner -Dsonar.token="$SONAR_TOKEN")
+                        (cd services/profiles && sonar-scanner -Dsonar.token="$SONAR_TOKEN")
+                        (cd services/messaging && sonar-scanner -Dsonar.token="$SONAR_TOKEN")
                     '''
                 }
             }
