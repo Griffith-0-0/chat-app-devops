@@ -1,14 +1,14 @@
 # Image Docker du service Auth
-# Node 18 Alpine, utilisateur non-root, port 3001
-FROM node:18-alpine
+# Node 20 Alpine, utilisateur non-root, port 3001
+FROM node:20-alpine
 
-# CVE-2025-15467 (libcrypto3/libssl3 CRITICAL) — aligner sur les correctifs Alpine
+# Aligner OpenSSL sur les derniers correctifs Alpine avant le scan Trivy
 RUN apk update && apk upgrade --no-cache libcrypto3 libssl3
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --only=production
+RUN npm ci --omit=dev
 
 COPY src/ ./src/
 

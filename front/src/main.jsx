@@ -16,6 +16,7 @@ import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 
 document.title = 'CoWork App';
+document.documentElement.dataset.app = 'cowork';
 
 createRoot(document.getElementById('root'), {
   onUncaughtError: reactErrorHandler(),
