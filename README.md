@@ -617,19 +617,52 @@ Bonne pratique : en production, les secrets doivent venir d'un vrai gestionnaire
 
 ![CoWork App profile settings](docs/assets/screenshots/04-cowork-app-profile-settings.png)
 
+### Docker - conteneurs locaux
+
+![Docker containers running](docs/assets/screenshots/06-docker-compose-ps.png)
+
+### Jenkins - pipeline CI/CD
+
+![Jenkins pipeline success](docs/assets/screenshots/07-jenkins-pipeline-success.png)
+
+### SonarCloud - qualite du code
+
+![SonarCloud dashboard](docs/assets/screenshots/08-sonarcloud-dashboard.png)
+
+### Kubernetes - pods Minikube
+
+![Kubernetes pods](docs/assets/screenshots/09-kubernetes-pods.png)
+
+### Kubernetes - dashboard
+
+![Kubernetes dashboard](docs/assets/screenshots/09-kubernetes-dashboard.png)
+
+### Argo CD - synchronisation GitOps
+
+![Argo CD applications](docs/assets/screenshots/10-argocd-apps.png)
+
+### Grafana - dashboard observabilite
+
+![Grafana dashboard](docs/assets/screenshots/11-grafana-dashboard.png)
+
+### Prometheus - requete memoire
+
+![Prometheus memory query](docs/assets/screenshots/11a-prometheus-memory-query.png)
+
+### Prometheus - requete CPU
+
+![Prometheus CPU query](docs/assets/screenshots/11b-prometheus-cpu-query.png)
+
+### Loki - logs applicatifs
+
+![Loki logs](docs/assets/screenshots/12-loki-logs.png)
+
 ## Screenshots a ajouter
 
-Les captures UI principales sont deja ajoutees dans `docs/assets/screenshots/`. Les captures DevOps restantes peuvent etre ajoutees avec ces noms :
+Les captures UI principales, Docker, Jenkins, SonarCloud, Kubernetes, Argo CD, Grafana, Prometheus et Loki sont deja ajoutees dans `docs/assets/screenshots/`. Les captures DevOps restantes peuvent etre ajoutees avec ces noms :
 
 | Nom du fichier | Contenu attendu |
 |---|---|
-| `06-docker-compose-ps.png` | Conteneurs Docker Compose en execution |
-| `07-jenkins-pipeline-success.png` | Pipeline Jenkins termine avec succes |
-| `08-sonarcloud-dashboard.png` | Dashboard SonarCloud |
-| `09-kubernetes-pods.png` | Pods Kubernetes dans le namespace `chat-app` |
-| `10-argocd-apps.png` | Applications Argo CD synchronisees |
-| `11-grafana-dashboard.png` | Dashboard Grafana |
-| `12-loki-logs.png` | Logs Loki dans Grafana |
 | `13-sentry-error.png` | Erreur capturee dans Sentry |
 | `14-alertmanager-discord.png` | Notification Discord envoyee par AlertManager |
 | `15-trivy-scan.png` | Resultat du scan Trivy |
